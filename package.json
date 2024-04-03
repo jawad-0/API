@@ -1,0 +1,36 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:faculty": "node FYP_API/Faculty.js",
+    "start:course": "node FYP_API/Course.js",
+    "start:approved": "node FYP_API/Approved_Papers.js",
+    "start:printed": "node FYP_API/Printed_Papers.js",
+    "start:assigned_course": "node FYP_API/Assigned_Course.js",
+    "start:all": "concurrently \"npm run start:faculty\" \"npm run start:course\" \"npm run start:approved\" \"npm run start:printed\" \"npm run start:assigned_course\"",
+    "strt:faculty": "node FYP_MYSQL/Faculty.js",
+    "strt:course": "node FYP_MYSQL/Course.js",
+    "strt:approved": "node FYP_MYSQL/Approved_Papers.js",
+    "strt:printed": "node FYP_MYSQL/Printed_Papers.js",
+    "strt:assigned_course": "node FYP_MYSQL/Assigned_Course.js",
+    "strt:clo": "node FYP_MYSQL/Clo.js",
+    "strt:all": "concurrently \"npm run strt:faculty\" \"npm run strt:course\" \"npm run strt:approved\" \"npm run strt:printed\" \"npm run strt:assigned_course\" \"npm run strt:clo\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "express": "^4.18.2",
+    "msnodesqlv8": "^4.1.2",
+    "mssql": "^10.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
