@@ -140,68 +140,68 @@ VALUES (1, 1, 'junior', 1),
        (20, 20, 'junior', 1);
 
 -- CLO
-INSERT INTO CLO (clo_id, c_id, clo_text, status) VALUES
+INSERT INTO CLO (clo_id, c_id, clo_number, clo_text, status) VALUES
        -- c_id = 1
-       (1, 1, 'Dummy text 1', 'disapproved'),
-       (2, 1, 'Dummy text 2', 'disapproved'),
-       (3, 1, 'Dummy text 3', 'disapproved'),
-       (4, 1, 'Dummy text 4', 'disapproved'),
-       (5, 1, 'Dummy text 5', 'disapproved'),
+       (1, 1, 'CLO-1', 'Dummy text 1', 'disapproved'),
+       (2, 1, 'CLO-2', 'Dummy text 2', 'disapproved'),
+       (3, 1, 'CLO-3', 'Dummy text 3', 'disapproved'),
+       (4, 1, 'CLO-4', 'Dummy text 4', 'disapproved'),
+       (5, 1, 'CLO-5', 'Dummy text 5', 'disapproved'),
        -- c_id = 2
-       (6, 2, 'Dummy text 6', 'disapproved'),
-       (7, 2, 'Dummy text 7', 'disapproved'),
-       (8, 2, 'Dummy text 8', 'disapproved'),
-       (9, 2, 'Dummy text 9', 'disapproved'),
-       (10, 2, 'Dummy text 10', 'disapproved'),
+       (6, 2, 'CLO-1', 'Dummy text 6', 'disapproved'),
+       (7, 2, 'CLO-2', 'Dummy text 7', 'disapproved'),
+       (8, 2, 'CLO-3', 'Dummy text 8', 'disapproved'),
+       (9, 2, 'CLO-4', 'Dummy text 9', 'disapproved'),
+       (10, 2, 'CLO-5', 'Dummy text 10', 'disapproved'),
        -- c_id = 3
-       (11, 3, 'Dummy text 11', 'disapproved'),
-       (12, 3, 'Dummy text 12', 'disapproved'),
-       (13, 3, 'Dummy text 13', 'disapproved'),
-       (14, 3, 'Dummy text 14', 'disapproved'),
-       (15, 3, 'Dummy text 15', 'disapproved'),
+       (11, 3, 'CLO-1', 'Dummy text 11', 'disapproved'),
+       (12, 3, 'CLO-2', 'Dummy text 12', 'disapproved'),
+       (13, 3, 'CLO-3', 'Dummy text 13', 'disapproved'),
+       (14, 3, 'CLO-4', 'Dummy text 14', 'disapproved'),
+       (15, 3, 'CLO-5', 'Dummy text 15', 'disapproved'),
         -- c_id = 4
-       (16, 4, 'Dummy text 16', 'disapproved'),
-       (17, 4, 'Dummy text 17', 'disapproved'),
-       (18, 4, 'Dummy text 18', 'disapproved'),
-       (19, 4, 'Dummy text 19', 'disapproved'),
-       (20, 4, 'Dummy text 20', 'disapproved'),
+       (16, 4, 'CLO-1', 'Dummy text 16', 'disapproved'),
+       (17, 4, 'CLO-2', 'Dummy text 17', 'disapproved'),
+       (18, 4, 'CLO-3', 'Dummy text 18', 'disapproved'),
+       (19, 4, 'CLO-4', 'Dummy text 19', 'disapproved'),
+       (20, 4, 'CLO-5', 'Dummy text 20', 'disapproved'),
        -- c_id = 5
-       (21, 5, 'Dummy text 21', 'disapproved'),
-       (22, 5, 'Dummy text 22', 'disapproved'),
-       (23, 5, 'Dummy text 23', 'disapproved'),
-       (24, 5, 'Dummy text 24', 'disapproved'),
-       (25, 5, 'Dummy text 25', 'disapproved'),
+       (21, 5, 'CLO-1', 'Dummy text 21', 'disapproved'),
+       (22, 5, 'CLO-2', 'Dummy text 22', 'disapproved'),
+       (23, 5, 'CLO-3', 'Dummy text 23', 'disapproved'),
+       (24, 5, 'CLO-4', 'Dummy text 24', 'disapproved'),
+       (25, 5, 'CLO-5', 'Dummy text 25', 'disapproved'),
        -- c_id = 6
-       (26, 6, 'Dummy text 26', 'disapproved'),
-       (27, 6, 'Dummy text 27', 'disapproved'),
-       (28, 6, 'Dummy text 28', 'disapproved'),
-       (29, 6, 'Dummy text 29', 'disapproved'),
-       (30, 6, 'Dummy text 30', 'disapproved'),
+       (26, 6, 'CLO-1', 'Dummy text 26', 'disapproved'),
+       (27, 6, 'CLO-2', 'Dummy text 27', 'disapproved'),
+       (28, 6, 'CLO-3', 'Dummy text 28', 'disapproved'),
+       (29, 6, 'CLO-4', 'Dummy text 29', 'disapproved'),
+       (30, 6, 'CLO-5', 'Dummy text 30', 'disapproved'),
        -- c_id = 7
-       (31, 7, 'Dummy text 31', 'disapproved'),
-       (32, 7, 'Dummy text 32', 'disapproved'),
-       (33, 7, 'Dummy text 33', 'disapproved'),
-       (34, 7, 'Dummy text 34', 'disapproved'),
-       (35, 7, 'Dummy text 35', 'disapproved'),
+       (31, 7, 'CLO-1', 'Dummy text 31', 'disapproved'),
+       (32, 7, 'CLO-2', 'Dummy text 32', 'disapproved'),
+       (33, 7, 'CLO-3', 'Dummy text 33', 'disapproved'),
+       (34, 7, 'CLO-4', 'Dummy text 34', 'disapproved'),
+       (35, 7, 'CLO-5', 'Dummy text 35', 'disapproved'),
        -- c_id = 8
-       (36, 8, 'Dummy text 36', 'disapproved'),
-       (37, 8, 'Dummy text 37', 'disapproved'),
-       (38, 8, 'Dummy text 38', 'disapproved'),
-       (39, 8, 'Dummy text 39', 'disapproved'),
-       (40, 8, 'Dummy text 40', 'disapproved'),
+       (36, 8, 'CLO-1', 'Dummy text 36', 'disapproved'),
+       (37, 8, 'CLO-2', 'Dummy text 37', 'disapproved'),
+       (38, 8, 'CLO-3', 'Dummy text 38', 'disapproved'),
+       (39, 8, 'CLO-4', 'Dummy text 39', 'disapproved'),
+       (40, 8, 'CLO-5', 'Dummy text 40', 'disapproved'),
        -- c_id = 9
-       (41, 9, 'Dummy text 41', 'disapproved'),
-       (42, 9, 'Dummy text 42', 'disapproved'),
-       (43, 9, 'Dummy text 43', 'disapproved'),
-       (44, 9, 'Dummy text 44', 'disapproved'),
-       (45, 9, 'Dummy text 45', 'disapproved'),
+       (41, 9, 'CLO-1', 'Dummy text 41', 'disapproved'),
+       (42, 9, 'CLO-2', 'Dummy text 42', 'disapproved'),
+       (43, 9, 'CLO-3', 'Dummy text 43', 'disapproved'),
+       (44, 9, 'CLO-4', 'Dummy text 44', 'disapproved'),
+       (45, 9, 'CLO-5', 'Dummy text 45', 'disapproved'),
        -- c_id = 10
-       (46, 10, 'Dummy text 46', 'disapproved'),
-       (47, 10, 'Dummy text 47', 'disapproved'),
-       (48, 10, 'Dummy text 48', 'disapproved'),
-       (49, 10, 'Dummy text 49', 'disapproved'),
-       (50, 10, 'Dummy text 50', 'disapproved');
-       
+       (46, 10, 'CLO-1', 'Dummy text 46', 'disapproved'),
+       (47, 10, 'CLO-2', 'Dummy text 47', 'disapproved'),
+       (48, 10, 'CLO-3', 'Dummy text 48', 'disapproved'),
+       (49, 10, 'CLO-4', 'Dummy text 49', 'disapproved'),
+       (50, 10, 'CLO-5', 'Dummy text 50', 'disapproved');
+
 INSERT INTO Paper (duration, degree, t_marks, term, year, exam_date, semester, status, c_id, s_id) VALUES
 		 (120, 'BSIT', 100, 'MID', 2023, '2024-01-01', 'Spring', 'pending', 1, 1),
 		 (120, 'BSIT', 100, 'MID', 2023, '2024-01-01', 'Spring', 'approved', 1, 1),
@@ -229,11 +229,11 @@ INSERT INTO grid_view_headers (header_id, NAME, weightage) VALUES
 		 (2, 'Quiz', 30),
 		 (3, 'Mid Term', 20),
 		 (4, 'Final Term', 30);
-		 
+
 INSERT INTO feedback (feedback_details, p_id, c_id, q_id) VALUES
  		 ('Change Question # 01', 1, 1, NULL),
 		 ('Change Question # 02', 2, 2, NULL),
-       ('Change Question # 03', 3, 3, NULL),
+         ('Change Question # 03', 3, 3, NULL),
 		 ('Change Question # 04', 4, 4, NULL),
 		 ('Change Question # 05', 5, 5, NULL),
 		 ('Change Question # 06', 6, 6, NULL),
@@ -251,6 +251,10 @@ INSERT INTO feedback (feedback_details, p_id, c_id, q_id) VALUES
 		 ('Change Question # 18', 18, 18, NULL),
 		 ('Change Question # 19', 19, 19, NULL),
 		 ('Change Question # 20', 20, 20, NULL);
-		 
-INSERT INTO question (q_text, q_image, q_marks, q_difficulty, q_status, t_id, p_id, f_id) VALUES 
-		 ('What is meant by Programming?', NULL, 10, 'Easy', 'pending', NULL, 1, 1);
+
+INSERT INTO question (q_text, q_image, q_marks, q_difficulty, q_status, t_id, p_id, f_id) VALUES
+		 ('What is meant by Programming?', NULL, 10, 'Easy', 'pending', NULL, 1, 1),
+         ('What is meant by Programming?', NULL, 15, 'Easy', 'pending', NULL, 1, 1),
+         ('What is meant by Programming?', NULL, 10, 'Medium', 'pending', NULL, 1, 1),
+         ('What is meant by Programming?', NULL, 15, 'Medium', 'pending', NULL, 1, 1),
+         ('What is meant by Programming?', NULL, 20, 'Hard', 'pending', NULL, 1, 1);

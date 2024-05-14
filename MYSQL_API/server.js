@@ -6,6 +6,7 @@ const assignedCoursesRoutes = require("./Assigned_Course");
 const cloRoutes = require("./Clo");
 const gridviewRoutes = require("./Grid_View");
 const feedbackRoutes = require("./Feedback");
+const questionRoutes = require("./Question");
 
 const app = express();
 const port = 8000;
@@ -20,6 +21,7 @@ app.use("/", assignedCoursesRoutes);
 app.use("/", cloRoutes);
 app.use("/", gridviewRoutes);
 app.use("/", feedbackRoutes);
+app.use("/", questionRoutes);
 
 
 app.use((req, res, next) => {

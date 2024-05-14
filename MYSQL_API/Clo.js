@@ -47,7 +47,7 @@ cloRouter.put("/approvedisapproveCLO/:clo_id", (req, res) => {
   if (status !== "approved" && status !== "disapproved") {
     return res.status(400).json({
       error:
-        'Invalid status value. Status must be either "approved" or "disapproved"',
+        'Invalid status value. Status must be either "approved" or "disapproved"'
     });
   }
   if (status === "approved") {
@@ -70,25 +70,77 @@ cloRouter.put("/approvedisapproveCLO/:clo_id", (req, res) => {
 });
 
 // POST endpoint
+// cloRouter.post("/addCLO", async (req, res) => {
+//   try {
+//     const { clo_id, c_id, clo_text } = req.body;
+//     const initialStatus = "pending";
+//     await pool.connect();
+//     await pool
+//       .request()
+//       .input("clo_id", sql.Int, clo_id)
+//       .input("c_id", sql.Int, c_id)
+//       .input("clo_text", sql.NVarChar(255), clo_text)
+//       .input("status", sql.NVarChar(255), initialStatus)
+//       .query(postQuery);
+//     res.status(200).json({ message: "CLO inserted successfully" });
+//   } catch (error) {
+//     console.error("Error inserting data:", error);
+//     res.status(500).json({ error: "Post Request Error" });
+//   } finally {
+//     pool.close();
+//   }
+// });
+
+// To Add New CLO
+// cloRouter.post("/addCLO", async (req, res) => {
+//     const { c_id, clo_number, clo_text } = req.body;
+//     const status = "pending";
+//     const query =
+//       "INSERT INTO CLO (c_id, clo_number, clo_text, status) VALUES (?, ?, ?, ?)";
+//     const values = [c_id, clo_number, clo_text, status];
+//     connection.query(query, values, (err) => {
+//       if (err) {
+//         console.error("Error executing the query:", err);
+//         res.status(500).json({ error: "Internal Server Error" });
+//         return;
+//       }
+//       res.status(200).json({ message: "CLO added successfully" });
+//     });
+//   });
+
+// To Add New CLO
 cloRouter.post("/addCLO", async (req, res) => {
-  try {
-    const { clo_id, c_id, clo_text } = req.body;
-    const initialStatus = "pending";
-    await pool.connect();
-    await pool
-      .request()
-      .input("clo_id", sql.Int, clo_id)
-      .input("c_id", sql.Int, c_id)
-      .input("clo_text", sql.NVarChar(255), clo_text)
-      .input("status", sql.NVarChar(255), initialStatus)
-      .query(postQuery);
-    res.status(200).json({ message: "CLO inserted successfully" });
-  } catch (error) {
-    console.error("Error inserting data:", error);
-    res.status(500).json({ error: "Post Request Error" });
-  } finally {
-    pool.close();
-  }
+  const { c_id, clo_number, clo_text } = req.body;
+  const status = "pending";
+  // Check if clo_number already exists for the specific c_id
+  const checkQuery =
+    "SELECT clo_number FROM CLO WHERE c_id = ? AND clo_number = ?";
+  connection.query(checkQuery, [c_id, clo_number], (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    if (results.length > 0) {
+      // clo_number already exists for the specific c_id
+      res
+        .status(400)
+        .json({ error: "CLO number already exists for this Course" });
+    } else {
+      // Insert new CLO
+      const insertQuery =
+        "INSERT INTO CLO (c_id, clo_number, clo_text, status) VALUES (?, ?, ?, ?)";
+      const values = [c_id, clo_number, clo_text, status];
+      connection.query(insertQuery, values, (err) => {
+        if (err) {
+          console.error("Error executing the query:", err);
+          res.status(500).json({ error: "Internal Server Error" });
+          return;
+        }
+        res.status(200).json({ message: "CLO added successfully" });
+      });
+    }
+  });
 });
 
 // EDIT endpoint

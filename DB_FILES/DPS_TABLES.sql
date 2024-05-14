@@ -45,8 +45,9 @@ CREATE TABLE Assigned_Course (
     FOREIGN KEY (s_id) REFERENCES session(s_id)
 );
 CREATE TABLE CLO (
-    clo_id INT PRIMARY KEY,
+    clo_id INT AUTO_INCREMENT PRIMARY KEY,
     c_id INT NOT NULL,
+    clo_number VARCHAR(10) NOT NULL,
     clo_text VARCHAR(100) NOT NULL,
     status VARCHAR(20) NOT NULL,
     FOREIGN KEY (c_id) REFERENCES Course(c_id)
@@ -68,6 +69,13 @@ CREATE TABLE Topic (
     t_name VARCHAR(255) NOT NULL,
     c_id INT NOT NULL,
     FOREIGN KEY (c_id) REFERENCES Course(c_id)
+);
+CREATE TABLE CLO_Topic_Map (
+    ct_id INT AUTO_INCREMENT PRIMARY KEY,
+    clo_id INT NOT NULL,
+    t_id INT NOT NULL,
+    FOREIGN KEY (clo_id) REFERENCES CLO(clo_id),
+    FOREIGN KEY (t_id) REFERENCES Topic(t_id)
 );
 CREATE TABLE Question (
     q_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -93,4 +101,3 @@ CREATE TABLE Feedback (
     FOREIGN KEY (c_id) REFERENCES Course(c_id),
     FOREIGN KEY (q_id) REFERENCES Question(q_id)
 );
-
