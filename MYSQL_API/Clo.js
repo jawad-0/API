@@ -110,62 +110,83 @@ cloRouter.put("/approvedisapproveCLO/:clo_id", (req, res) => {
 
 // To Add New CLO
 cloRouter.post("/addCLO", async (req, res) => {
-  const { c_id, clo_number, clo_text } = req.body;
-  const status = "pending";
-  // Check if clo_number already exists for the specific c_id
-  const checkQuery =
-    "SELECT clo_number FROM CLO WHERE c_id = ? AND clo_number = ?";
-  connection.query(checkQuery, [c_id, clo_number], (err, results) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    if (results.length > 0) {
-      // clo_number already exists for the specific c_id
-      res
-        .status(400)
-        .json({ error: "CLO number already exists for this Course" });
-    } else {
-      // Insert new CLO
-      const insertQuery =
-        "INSERT INTO CLO (c_id, clo_number, clo_text, status) VALUES (?, ?, ?, ?)";
-      const values = [c_id, clo_number, clo_text, status];
-      connection.query(insertQuery, values, (err) => {
-        if (err) {
-          console.error("Error executing the query:", err);
-          res.status(500).json({ error: "Internal Server Error" });
-          return;
-        }
-        res.status(200).json({ message: "CLO added successfully" });
-      });
-    }
-  });
+  try {
+    const { c_id, clo_number, clo_text } = req.body;
+    const status = "pending";
+    // Check if clo_number already exists for the specific c_id
+    const checkQuery =
+      "SELECT clo_number FROM CLO WHERE c_id = ? AND clo_number = ?";
+    connection.query(checkQuery, [c_id, clo_number], (err, results) => {
+      if (err) {
+        console.error("Error executing the query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
+      }
+      if (results.length > 0) {
+        // clo_number already exists for the specific c_id
+        res
+          .status(400)
+          .json({ error: "CLO number already exists for this Course" });
+      } else {
+        // Insert new CLO
+        const insertQuery =
+          "INSERT INTO CLO (c_id, clo_number, clo_text, status) VALUES (?, ?, ?, ?)";
+        const values = [c_id, clo_number, clo_text, status];
+        connection.query(insertQuery, values, (err) => {
+          if (err) {
+            console.error("Error executing the query:", err);
+            res.status(500).json({ error: "Internal Server Error" });
+            return;
+          }
+          res.status(200).json({ message: "CLO added successfully" });
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error adding new CLO:", error);
+    res.status(500).json({ error: "Add CLO Request Error" });
+  }
 });
 
 // EDIT endpoint
 cloRouter.put("/editCLO/:clo_id", async (req, res) => {
   try {
-    const userId = req.params.clo_id;
-    const { clo_text } = req.body;
-    if (!/^\d+$/.test(userId)) {
-      return res.status(400).json({ error: "Invalid CLO ID" });
-    }
-    await pool.connect();
-    const result = await pool
-      .request()
-      .input("clo_id", sql.Int, userId)
-      .input("clo_text", sql.NVarChar(255), clo_text)
-      .query(editQuery);
-    if (result.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: "CLO not found" });
-    }
-    res.status(200).json({ message: "CLO updated successfully" });
+    const { clo_id } = req.params;
+    const { c_id, clo_number, clo_text } = req.body;
+    const status = "pending";
+    // Check if clo_number already exists for the specific c_id
+    const checkQuery =
+      "SELECT clo_id FROM CLO WHERE c_id = ? AND clo_number = ? AND clo_id != ?";
+    connection.query(
+      checkQuery,
+      [c_id, clo_number, clo_id],
+      async (err, results) => {
+        if (err) {
+          console.error("Error executing the query:", err);
+          return res.status(500).json({ error: "Internal Server Error" });
+        }
+        // If clo_number already exists for the specific c_id and it's not the current clo_id
+        if (results.length > 0) {
+          return res
+            .status(400)
+            .json({ error: "CLO number already exists for this Course" });
+        }
+        // Update CLO
+        const updateQuery =
+          "UPDATE CLO SET clo_number = ?, clo_text = ?, status = ? WHERE clo_id = ?";
+        const values = [clo_number, clo_text, status, clo_id];
+        connection.query(updateQuery, values, (err, _) => {
+          if (err) {
+            console.error("Error executing the query:", err);
+            return res.status(500).json({ error: "Internal Server Error" });
+          }
+          res.status(200).json({ message: "CLO updated successfully" });
+        });
+      }
+    );
   } catch (error) {
-    console.error("Error updating user:", error);
+    console.error("Error updating CLO:", error);
     res.status(500).json({ error: "Edit Request Error" });
-  } finally {
-    pool.close();
   }
 });
 

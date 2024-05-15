@@ -258,3 +258,15 @@ INSERT INTO question (q_text, q_image, q_marks, q_difficulty, q_status, t_id, p_
          ('What is meant by Programming?', NULL, 10, 'Medium', 'pending', NULL, 1, 1),
          ('What is meant by Programming?', NULL, 15, 'Medium', 'pending', NULL, 1, 1),
          ('What is meant by Programming?', NULL, 20, 'Hard', 'pending', NULL, 1, 1);
+
+INSERT INTO topic (t_id, t_name, c_id) VALUES
+         (1, 'Basic Structure of Programming', 1),
+         (2, 'Basic Structure of Programming', 1),
+         (3, 'Basic Structure of Programming', 1),
+         (4, 'Basic Structure of Programming', 1),
+         (5, 'Basic Structure of Programming', 1),
+         (6, 'Basic Structure of Programming', 1),
+         (7, 'Basic Structure of Programming', 1),
+         (8, 'Basic Structure of Programming', 1),
+         (9, 'Basic Structure of Programming', 1),
+         (10, 'Basic Structure of Programming', 1);
