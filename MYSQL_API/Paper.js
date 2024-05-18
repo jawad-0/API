@@ -20,13 +20,14 @@ paperRouter.get("/getpaperheader/:p_id", (req, res) => {
   });
 });
 
-paperRouter.get("/getpaperheaderfaculty/:p_id", (req, res) => {
-    const paperId = req.params.p_id;
-    if (!/^\d+$/.test(paperId)) {
+paperRouter.get("/getpaperheaderfaculty/:c_id", (req, res) => {
+    const courseId = req.params.c_id;
+    if (!/^\d+$/.test(courseId)) {
       return res.status(400).json({ error: "Invalid paper ID" });
     }
-    const query = "SELECT f_name FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id JOIN paper p ON p.c_id = c.c_id WHERE p.p_id = ?";
-    connection.query(query, [paperId], (err, result) => {
+    // const query = "SELECT f_name FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id JOIN paper p ON p.c_id = c.c_id WHERE p.p_id = ?";
+    const query = "SELECT f.f_id, f.f_name FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE c.c_id = ?";
+    connection.query(query, [courseId], (err, result) => {
       if (err) {
         console.error("Error executing the query:", err);
         res.status(500).json({ error: "Internal Server Error" });

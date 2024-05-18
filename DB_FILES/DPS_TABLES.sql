@@ -77,10 +77,10 @@ CREATE TABLE Subtopic (
     FOREIGN KEY (t_id) REFERENCES Topic(t_id)
 );
 CREATE TABLE TopicTaught (
+    tt_id INT AUTO_INCREMENT,
     f_id INT,
     t_id INT,
     st_id INT,
-    progress INT,
     FOREIGN KEY (f_id) REFERENCES Faculty(f_id),
     FOREIGN KEY (t_id) REFERENCES Topic(t_id),
     FOREIGN KEY (st_id) REFERENCES Subtopic(st_id)
