@@ -77,7 +77,7 @@ CREATE TABLE Subtopic (
     FOREIGN KEY (t_id) REFERENCES Topic(t_id)
 );
 CREATE TABLE TopicTaught (
-    tt_id INT AUTO_INCREMENT,
+    tt_id INT AUTO_INCREMENT PRIMARY KEY,
     f_id INT,
     t_id INT,
     st_id INT,
@@ -85,6 +85,7 @@ CREATE TABLE TopicTaught (
     FOREIGN KEY (t_id) REFERENCES Topic(t_id),
     FOREIGN KEY (st_id) REFERENCES Subtopic(st_id)
 );
+
 CREATE TABLE CLO_Topic_Map (
     ct_id INT AUTO_INCREMENT PRIMARY KEY,
     clo_id INT NOT NULL,

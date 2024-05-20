@@ -259,14 +259,46 @@ INSERT INTO question (q_text, q_image, q_marks, q_difficulty, q_status, t_id, p_
          ('What is meant by Programming?', NULL, 15, 'Medium', 'pending', NULL, 1, 1),
          ('What is meant by Programming?', NULL, 20, 'Hard', 'pending', NULL, 1, 1);
 
-INSERT INTO topic (t_id, t_name, c_id) VALUES
-         (1, 'Basic Structure of Programming', 1),
-         (2, 'Basic Structure of Programming', 1),
-         (3, 'Basic Structure of Programming', 1),
-         (4, 'Basic Structure of Programming', 1),
-         (5, 'Basic Structure of Programming', 1),
-         (6, 'Basic Structure of Programming', 1),
-         (7, 'Basic Structure of Programming', 1),
-         (8, 'Basic Structure of Programming', 1),
-         (9, 'Basic Structure of Programming', 1),
-         (10, 'Basic Structure of Programming', 1);
+INSERT INTO topic (t_id, t_name, c_id, status) VALUES
+         (1, 'Basic Structure of Programming', 1, 'enabled'),
+         (2, 'Basic Structure of Programming', 1, 'enabled'),
+         (3, 'Basic Structure of Programming', 1, 'enabled'),
+         (4, 'Basic Structure of Programming', 1, 'enabled'),
+         (5, 'Basic Structure of Programming', 1, 'enabled'),
+         (6, 'Basic Structure of Programming', 1, 'enabled'),
+         (7, 'Basic Structure of Programming', 1, 'enabled'),
+         (8, 'Basic Structure of Programming', 1, 'enabled'),
+         (9, 'Basic Structure of Programming', 1, 'enabled'),
+         (10, 'Basic Structure of Programming', 1, 'enabled'),
+         (11, 'Basic Functions of Programming', 2, 'enabled'),
+         (12, 'Basic Functions of Programming', 2, 'enabled'),
+         (13, 'Basic Functions of Programming', 2, 'enabled'),
+         (14, 'Basic Functions of Programming', 2, 'enabled'),
+         (15, 'Basic Functions of Programming', 2, 'enabled'),
+         (16, 'Basic Functions of Programming', 2, 'enabled'),
+         (17, 'Basic Functions of Programming', 2, 'enabled'),
+         (18, 'Basic Functions of Programming', 2, 'enabled'),
+         (19, 'Basic Functions of Programming', 2, 'enabled'),
+         (20, 'Basic Functions of Programming', 2, 'enabled');
+
+INSERT INTO TopicTaught (f_id, t_id, st_id) VALUES
+         (1,1,NULL),
+         (1,2,NULL),
+         (1,3,NULL),
+         (1,4,NULL),
+         (1,5,NULL),
+         (2,1,NULL),
+         (2,2,NULL),
+         (2,3,NULL),
+         (25,1,NULL),
+         (25,4,NULL);
+         (1,11,NULL),
+         (1,12,NULL),
+         (1,13,NULL),
+         (25,14,NULL),
+         (25,15,NULL),
+         (3,16,NULL),
+         (3,17,NULL),
+         (4,18,NULL),
+         (4,19,NULL),
+         (4,20,NULL);
