@@ -102,3 +102,22 @@ FROM
     TopicTaught tt
 WHERE
     tt.t_id = 1;
+
+SELECT grid_view_weightage_test.*
+FROM Course
+JOIN CLO ON Course.c_id = CLO.c_id
+JOIN grid_view_weightage_test ON CLO.clo_id = grid_view_weightage_test.clo_id
+WHERE Course.c_id = 1;
+
+SELECT gvwt.*
+FROM Course
+JOIN CLO ON Course.c_id = CLO.c_id
+JOIN grid_view_weightage_test gvwt ON CLO.clo_id = gvwt.clo_id
+WHERE Course.c_id = 1
+ORDER BY CLO.CLO_number ASC;
+
+SELECT SUM(weightage1) AS totalWeightage1,
+       SUM(weightage2) AS totalWeightage2,
+		 SUM(weightage3) AS totalWeightage3,
+		 SUM(weightage4) AS totalWeightage4
+FROM Grid_View_Weightage_Test WHERE clo_id IN (SELECT clo_id FROM CLO WHERE c_id = 1);

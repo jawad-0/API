@@ -133,3 +133,11 @@ CREATE TABLE Feedback (
     FOREIGN KEY (c_id) REFERENCES Course(c_id),
     FOREIGN KEY (q_id) REFERENCES Question(q_id)
 );
+CREATE TABLE Grid_View_Weightage_Test (
+    clo_id INT NOT NULL,
+    weightage1 INT,
+    weightage2 INT,
+    weightage3 INT,
+    weightage4 INT,
+    FOREIGN KEY (clo_id) REFERENCES CLO(clo_id)
+);

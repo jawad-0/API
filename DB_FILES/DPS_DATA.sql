@@ -117,7 +117,7 @@ VALUES (1, 1, 'junior', 1),
        (9, 17, 'junior', 1),
        (9, 18, 'junior', 1),
        (10, 19, 'junior', 1),
-       (10, 20, 'junior', 1);
+       (10, 20, 'junior', 1),
 	   (11, 1, 'junior', 1),
 	   (11, 2, 'junior', 1),
        (12, 3, 'junior', 1),
@@ -302,3 +302,15 @@ INSERT INTO TopicTaught (f_id, t_id, st_id) VALUES
          (4,18,NULL),
          (4,19,NULL),
          (4,20,NULL);
+
+INSERT INTO grid_view_weightage_test (clo_id, weightage1, weightage2, weightage3, weightage4) VALUES
+         (1, 8, 4, 10, 0),
+         (2, 5, 6, 5, 0),
+         (3, 7, 8, 5, 8),
+         (4, 0, 6, 0, 8),
+         (5, 0, 6, 0, 14),
+         (6, 8, 4, 10, 0),
+         (7, 5, 6, 5, 0),
+         (8, 7, 8, 5, 8),
+         (9, 0, 6, 0, 8),
+         (10, 0, 6, 0, 14);
