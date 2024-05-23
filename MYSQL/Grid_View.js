@@ -6,12 +6,11 @@ const connection = require("./database");
 gridviewRouter.use(bodyParser.json());
 
 // To Add New Course
-gridviewRouter.post("/addcourse", (req, res) => {
-  const { c_code, c_title, cr_hours } = req.body;
-  const status = "enabled";
+gridviewRouter.post("/addGridViewWeightage", (req, res) => {
+  const { clo_id, header_id, weightage } = req.body;
   const query =
-    "INSERT INTO Course (c_code, c_title, cr_hours, status) VALUES (?, ?, ?, ?)";
-  const values = [c_code, c_title, cr_hours, status];
+    "INSERT INTO Grid_View_Weightage (clo_id, header_id, weightage) VALUES (?, ?, ?)";
+  const values = [clo_id, header_id, weightage];
   connection.query(query, values, (err) => {
     if (err) {
       console.error("Error executing the query:", err);

@@ -1,5 +1,21 @@
 CREATE DATABASE dps;
 USE dps;
+
+1-  Session
+2-  Faculty
+3-  Course
+4-  Paper
+5-  Assigned_Course
+6-  CLO
+7-  Grid_View_Headers
+8-  Grid_View_Weightage
+9-  Topic
+10- Subtopic
+11- Topic_Taught
+12- Topic_Map_CLO
+13- Question
+14- Feedback
+
 CREATE TABLE Session (
     s_id INT AUTO_INCREMENT PRIMARY KEY,
     s_name VARCHAR(20) NOT NULL,
@@ -68,7 +84,8 @@ CREATE TABLE Topic (
     t_id INT PRIMARY KEY,
     t_name VARCHAR(255) NOT NULL,
     c_id INT NOT NULL,
-    FOREIGN KEY (c_id) REFERENCES Course(c_id)
+    FOREIGN KEY (c_id) REFERENCES Course(c_id),
+    status VARCHAR(20) NOT NULL
 );
 CREATE TABLE Subtopic (
     st_id INT PRIMARY KEY,
@@ -76,7 +93,7 @@ CREATE TABLE Subtopic (
     st_name VARCHAR(255),
     FOREIGN KEY (t_id) REFERENCES Topic(t_id)
 );
-CREATE TABLE TopicTaught (
+CREATE TABLE Topic_Taught (
     tt_id INT AUTO_INCREMENT PRIMARY KEY,
     f_id INT,
     t_id INT,
@@ -85,8 +102,7 @@ CREATE TABLE TopicTaught (
     FOREIGN KEY (t_id) REFERENCES Topic(t_id),
     FOREIGN KEY (st_id) REFERENCES Subtopic(st_id)
 );
-
-CREATE TABLE CLO_Topic_Map (
+CREATE TABLE Topic_Map_CLO (
     ct_id INT AUTO_INCREMENT PRIMARY KEY,
     clo_id INT NOT NULL,
     t_id INT NOT NULL,
