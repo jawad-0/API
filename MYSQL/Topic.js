@@ -20,7 +20,7 @@ topicRouter.get("/gettopic/:c_id", (req, res) => {
 
 topicRouter.get("/gettopictaught/:f_id", (req, res) => {
   const facultyId = req.params.f_id;
-  const query = "SELECT * FROM TopicTaught WHERE f_id = ?";
+  const query = "SELECT * FROM Topic_Taught WHERE f_id = ?";
 
   connection.query(query, [facultyId], (err, results) => {
     if (err) {
@@ -35,7 +35,7 @@ topicRouter.get("/gettopictaught/:f_id", (req, res) => {
 topicRouter.get("/getcommontopictaught/:c_id", (req, res) => {
   const courseId = req.params.c_id;
   const query =
-    "SELECT t.* FROM Topic t WHERE NOT EXISTS (SELECT f_id FROM Assigned_Course ac WHERE ac.c_id = ? AND ac.f_id NOT IN (SELECT DISTINCT tt.f_id FROM TopicTaught tt WHERE tt.t_id = t.t_id))";
+    "SELECT t.* FROM Topic t WHERE NOT EXISTS (SELECT f_id FROM Assigned_Course ac WHERE ac.c_id = ? AND ac.f_id NOT IN (SELECT DISTINCT tt.f_id FROM Topic_Taught tt WHERE tt.t_id = t.t_id))";
   connection.query(query, [courseId], (err, results) => {
     if (err) {
       console.error("Error executing the query:", err);
@@ -81,7 +81,7 @@ topicRouter.get("/getcommontopictaught/:c_id", (req, res) => {
 // To Add New Topic Taught
 topicRouter.post("/addtopictaught", (req, res) => {
   const { f_id, t_id, st_id } = req.body;
-  const query = "INSERT INTO TopicTaught (f_id, t_id, st_id) VALUES (?, ?, ?)";
+  const query = "INSERT INTO Topic_Taught (f_id, t_id, st_id) VALUES (?, ?, ?)";
   const values = [f_id, t_id, st_id];
   connection.query(query, values, (err) => {
     if (err) {
@@ -102,7 +102,7 @@ topicRouter.delete("/deletetopictaught", (req, res) => {
   if (!/^\d+$/.test(f_id)) {
     return res.status(400).json({ error: "Invalid faculty ID" });
   }
-  const query = "DELETE FROM TopicTaught WHERE t_id = ? AND f_id = ?";
+  const query = "DELETE FROM Topic_Taught WHERE t_id = ? AND f_id = ?";
   const values = [t_id, f_id];
   connection.query(query, values, (err, result) => {
     if (err) {
