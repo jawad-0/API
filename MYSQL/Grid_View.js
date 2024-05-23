@@ -37,22 +37,6 @@ gridviewRouter.get("/getGridViewHeaders", (req, res) => {
 // To Add New Grid_View_Weightage
 gridviewRouter.post("/addGridViewWeightage", (req, res) => {
   const { clo_id, weightage1, weightage2, weightage3, weightage4 } = req.body;
-  const query =
-    "INSERT INTO Grid_View_Weightage_Test (clo_id, weightage1, weightage2, weightage3, weightage4) VALUES (?, ?, ?, ?, ?)";
-  const values = [clo_id, weightage1, weightage2, weightage3, weightage4];
-  connection.query(query, values, (err) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.status(200).json({ message: "Grid_View_Weightage added successfully" });
-  });
-});
-
-// To Add New Grid_View_Weightage
-gridviewRouter.post("/addGridViewWeightage2", (req, res) => {
-  const { clo_id, weightage1, weightage2, weightage3, weightage4 } = req.body;
   // Get the course ID of the current CLO
   connection.query(
     "SELECT c_id FROM CLO WHERE clo_id = ?",
@@ -115,6 +99,22 @@ gridviewRouter.post("/addGridViewWeightage2", (req, res) => {
       );
     }
   );
+});
+
+// To Add New Grid_View_Weightage
+gridviewRouter.post("/addGridViewWeightage2", (req, res) => {
+  const { clo_id, weightage1, weightage2, weightage3, weightage4 } = req.body;
+  const query =
+    "INSERT INTO Grid_View_Weightage_Test (clo_id, weightage1, weightage2, weightage3, weightage4) VALUES (?, ?, ?, ?, ?)";
+  const values = [clo_id, weightage1, weightage2, weightage3, weightage4];
+  connection.query(query, values, (err) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.status(200).json({ message: "Grid_View_Weightage added successfully" });
+  });
 });
 
 // To Get Grid_View_Weightage of 1 CLO
