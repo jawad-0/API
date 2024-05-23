@@ -62,18 +62,29 @@ gridviewRouter.post("/addGridViewWeightage", (req, res) => {
           const totalWeightage2 = results[0].totalWeightage2 || 0;
           const totalWeightage3 = results[0].totalWeightage3 || 0;
           const totalWeightage4 = results[0].totalWeightage4 || 0;
+
           // Validate against the specified limits
-          if (
-            weightage1 + totalWeightage1 > 20 ||
-            weightage2 + totalWeightage2 > 30 ||
-            weightage3 + totalWeightage3 > 20 ||
-            weightage4 + totalWeightage4 > 20
-          ) {
-            res.status(400).json({
-              error: "Total weightage limits exceeded for the course"
-            });
+          const errors = [];
+
+          if (weightage1 + totalWeightage1 > 20) {
+            errors.push("Total weightage1 limit exceeded for the course");
+          }
+          if (weightage2 + totalWeightage2 > 30) {
+            errors.push("Total weightage2 limit exceeded for the course");
+          }
+          if (weightage3 + totalWeightage3 > 20) {
+            errors.push("Total weightage3 limit exceeded for the course");
+          }
+          if (weightage4 + totalWeightage4 > 30) {
+            errors.push("Total weightage4 limit exceeded for the course");
+          }
+
+          // If any errors are found, return them
+          if (errors.length > 0) {
+            res.status(400).json({ errors });
             return;
           }
+
           // Proceed with the insertion if validation passes
           const query =
             "INSERT INTO Grid_View_Weightage_Test (clo_id, weightage1, weightage2, weightage3, weightage4) VALUES (?, ?, ?, ?, ?)";
