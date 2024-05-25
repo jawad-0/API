@@ -75,10 +75,11 @@ CREATE TABLE Grid_View_Headers (
 );
 CREATE TABLE Grid_View_Weightage (
     clo_id INT NOT NULL,
-    header_id INT NOT NULL,
-    weightage INT NOT NULL,
-    FOREIGN KEY (clo_id) REFERENCES CLO(clo_id),
-    FOREIGN KEY (header_id) REFERENCES Grid_View_Headers(header_id)
+    weightage1 INT,
+    weightage2 INT,
+    weightage3 INT,
+    weightage4 INT,
+    FOREIGN KEY (clo_id) REFERENCES CLO(clo_id)
 );
 CREATE TABLE Topic (
     t_id INT PRIMARY KEY,
@@ -132,12 +133,4 @@ CREATE TABLE Feedback (
     FOREIGN KEY (p_id) REFERENCES Paper(p_id),
     FOREIGN KEY (c_id) REFERENCES Course(c_id),
     FOREIGN KEY (q_id) REFERENCES Question(q_id)
-);
-CREATE TABLE Grid_View_Weightage_Test (
-    clo_id INT NOT NULL,
-    weightage1 INT,
-    weightage2 INT,
-    weightage3 INT,
-    weightage4 INT,
-    FOREIGN KEY (clo_id) REFERENCES CLO(clo_id)
 );
