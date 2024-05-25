@@ -281,7 +281,34 @@ INSERT INTO topic (t_id, t_name, c_id, status) VALUES
          (19, 'Basic Functions of Programming', 2, 'enabled'),
          (20, 'Basic Functions of Programming', 2, 'enabled');
 
-INSERT INTO TopicTaught (f_id, t_id, st_id) VALUES
+INSERT INTO subtopic (t_id, st_name) VALUES
+         (1,'Subtopic 1 Topic 1'),
+         (1,'Subtopic 2 Topic 1'),
+         (1,'Subtopic 3 Topic 1'),
+         (1,'Subtopic 4 Topic 1'),
+         (1,'Subtopic 5 Topic 1'),
+         (2,'Subtopic 1 Topic 2'),
+         (2,'Subtopic 2 Topic 2'),
+         (2,'Subtopic 3 Topic 2'),
+         (2,'Subtopic 4 Topic 2'),
+         (2,'Subtopic 5 Topic 2'),
+         (3,'Subtopic 1 Topic 3'),
+         (3,'Subtopic 2 Topic 3'),
+         (3,'Subtopic 3 Topic 3'),
+         (3,'Subtopic 4 Topic 3'),
+         (3,'Subtopic 5 Topic 3'),
+         (4,'Subtopic 1 Topic 4'),
+         (4,'Subtopic 2 Topic 4'),
+         (4,'Subtopic 3 Topic 4'),
+         (4,'Subtopic 4 Topic 4'),
+         (4,'Subtopic 5 Topic 4'),
+         (5,'Subtopic 1 Topic 5'),
+         (5,'Subtopic 2 Topic 5'),
+         (5,'Subtopic 3 Topic 5'),
+         (5,'Subtopic 4 Topic 5'),
+         (5,'Subtopic 5 Topic 5');
+
+INSERT INTO Topic_Taught (f_id, t_id, st_id) VALUES
          (1,1,NULL),
          (1,2,NULL),
          (1,3,NULL),
