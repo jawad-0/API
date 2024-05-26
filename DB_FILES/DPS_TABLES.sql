@@ -82,14 +82,14 @@ CREATE TABLE Grid_View_Weightage (
     FOREIGN KEY (clo_id) REFERENCES CLO(clo_id)
 );
 CREATE TABLE Topic (
-    t_id INT PRIMARY KEY,
+    t_id INT AUTO_INCREMENT PRIMARY KEY,
     t_name VARCHAR(255) NOT NULL,
     c_id INT NOT NULL,
     FOREIGN KEY (c_id) REFERENCES Course(c_id),
     status VARCHAR(20) NOT NULL
 );
 CREATE TABLE Subtopic (
-    st_id INT PRIMARY KEY,
+    st_id INT AUTO_INCREMENT PRIMARY KEY,
     t_id INT,
     st_name VARCHAR(255),
     FOREIGN KEY (t_id) REFERENCES Topic(t_id)

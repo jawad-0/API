@@ -18,6 +18,114 @@ topicRouter.get("/gettopic/:c_id", (req, res) => {
   });
 });
 
+// topicRouter.post("/addtopic", (req, res) => {
+//     const { c_id, t_name } = req.body;
+//     const status = "enabled";
+//     const query =
+//       "INSERT INTO Topic (c_id, t_name, status) VALUES (?, ?, ?)";
+//     const values = [c_id, t_name, status];
+//     connection.query(query, values, (err) => {
+//       if (err) {
+//         console.error("Error executing the query:", err);
+//         res.status(500).json({ error: "Internal Server Error" });
+//         return;
+//       }
+//       res.status(200).json({ message: "Topic added successfully" });
+//     });
+//   });
+
+topicRouter.post("/addtopic", (req, res) => {
+  const { c_id, t_name, clo_ids } = req.body; // Expect clo_ids to be an array
+  const status = "enabled";
+  const insertTopicQuery =
+    "INSERT INTO Topic (c_id, t_name, status) VALUES (?, ?, ?)";
+  const insertTopicValues = [c_id, t_name, status];
+
+  // Insert the topic
+  connection.query(insertTopicQuery, insertTopicValues, (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+
+    const t_id = result.insertId; // Get the inserted topic ID
+
+    // Insert into Topic_Map_CLO
+    if (clo_ids && clo_ids.length > 0) {
+      const insertMappingQuery =
+        "INSERT INTO Topic_Map_CLO (clo_id, t_id) VALUES ?";
+      const insertMappingValues = clo_ids.map((clo_id) => [clo_id, t_id]);
+
+      connection.query(insertMappingQuery, [insertMappingValues], (err) => {
+        if (err) {
+          console.error("Error executing the mapping query:", err);
+          res.status(500).json({ error: "Internal Server Error" });
+          return;
+        }
+
+        res
+          .status(200)
+          .json({ message: "Topic and mappings added successfully" });
+      });
+    } else {
+      res.status(200).json({
+        message: "Topic added successfully, but no CLO mappings were provided"
+      });
+    }
+  });
+});
+
+topicRouter.put("/edittopic", (req, res) => {
+  const { t_id, t_name, add_clo_ids, remove_clo_ids } = req.body;
+
+  const updateTopicQuery =
+    "UPDATE Topic SET t_name = ? WHERE t_id = ?";
+  const updateTopicValues = [t_name, t_id];
+
+  connection.query(updateTopicQuery, updateTopicValues, (err) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+
+    // Add new CLO mappings
+    if (add_clo_ids && add_clo_ids.length > 0) {
+      const addMappingsQuery =
+        "INSERT INTO Topic_Map_CLO (clo_id, t_id) VALUES ?";
+      const addMappingsValues = add_clo_ids.map((clo_id) => [clo_id, t_id]);
+
+      connection.query(addMappingsQuery, [addMappingsValues], (err) => {
+        if (err) {
+          console.error("Error executing the query:", err);
+          res.status(500).json({ error: "Internal Server Error" });
+          return;
+        }
+      });
+    }
+
+    // Remove CLO mappings
+    if (remove_clo_ids && remove_clo_ids.length > 0) {
+      const removeMappingsQuery =
+        "DELETE FROM Topic_Map_CLO WHERE t_id = ? AND clo_id IN (?)";
+      const removeMappingsValues = [t_id, remove_clo_ids];
+
+      connection.query(removeMappingsQuery, removeMappingsValues, (err) => {
+        if (err) {
+          console.error("Error executing the query:", err);
+          res.status(500).json({ error: "Internal Server Error" });
+          return;
+        }
+      });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Topic and mappings updated successfully" });
+  });
+});
+
 topicRouter.get("/gettopictaught/:f_id", (req, res) => {
   const facultyId = req.params.f_id;
   const query = "SELECT * FROM Topic_Taught WHERE f_id = ?";
@@ -35,7 +143,7 @@ topicRouter.get("/gettopictaught/:f_id", (req, res) => {
 topicRouter.get("/getcommontopictaught/:c_id", (req, res) => {
   const courseId = req.params.c_id;
   const query =
-    "SELECT t.* FROM Topic t WHERE NOT EXISTS (SELECT f_id FROM Assigned_Course ac WHERE ac.c_id = ? AND ac.f_id NOT IN (SELECT DISTINCT tt.f_id FROM Topic_Taught tt WHERE tt.t_id = t.t_id))";
+    "SELECT t.* FROM Topic t WHERE NOT EXISTS (SELECT ac.f_id FROM Assigned_Course ac WHERE ac.c_id = ? AND ac.f_id NOT IN (SELECT DISTINCT tt.f_id FROM Topic_Taught tt WHERE tt.t_id = t.t_id))";
   connection.query(query, [courseId], (err, results) => {
     if (err) {
       console.error("Error executing the query:", err);

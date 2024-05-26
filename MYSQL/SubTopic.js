@@ -32,10 +32,10 @@ subtopicRouter.get("/getsubtopictaught/:f_id", (req, res) => {
   });
 });
 
-subtopicRouter.get("/getcommontopictaught/:c_id", (req, res) => {
+subtopicRouter.get("/getcommonsubtopictaught/:c_id", (req, res) => {
   const courseId = req.params.c_id;
   const query =
-    "SELECT t.* FROM Topic t WHERE NOT EXISTS (SELECT f_id FROM Assigned_Course ac WHERE ac.c_id = ? AND ac.f_id NOT IN (SELECT DISTINCT tt.f_id FROM Topic_Taught tt WHERE tt.t_id = t.t_id))";
+    "SELECT st.* FROM SubTopic st WHERE NOT EXISTS (SELECT ac.f_id FROM Assigned_Course ac WHERE ac.c_id = ? AND ac.f_id NOT IN (SELECT DISTINCT tt.f_id FROM Topic_Taught tt WHERE tt.st_id = st.st_id))";
   connection.query(query, [courseId], (err, results) => {
     if (err) {
       console.error("Error executing the query:", err);
@@ -46,37 +46,6 @@ subtopicRouter.get("/getcommontopictaught/:c_id", (req, res) => {
   });
 });
 
-// subtopicRouter.get("/getcommontopictaught2/:c_id", (req, res) => {
-//   const courseId = req.params.c_id;
-//   // const query = "SELECT t.t_id, COUNT(DISTINCT tt.f_id) AS taught_count, (SELECT COUNT(DISTINCT f.f_id) FROM Faculty f JOIN Assigned_Course ac ON f.f_id = ac.f_id WHERE ac.c_id = 1) AS total_teachers FROM Topic JOIN TopicTaught tt ON t.t_id = tt.t_id WHERE t.c_id = 1 GROUP BY t.t_id HAVING taught_count = (SELECT COUNT(DISTINCT f.f_id) FROM Faculty f JOIN Assigned_Course ac ON f.f_id = ac.f_id WHERE ac.c_id = 1)";
-//   const query =
-//     "SELECT t.t_id, COUNT(DISTINCT tt.f_id) AS taught_count, (SELECT COUNT(DISTINCT f.f_id) FROM Faculty f JOIN Assigned_Course ac ON f.f_id = ac.f_id WHERE ac.c_id = ?) AS total_teachers FROM Topic t JOIN TopicTaught tt ON t.t_id = tt.t_id WHERE t.c_id = ? GROUP BY t.t_id HAVING taught_count = (SELECT COUNT(DISTINCT f.f_id) FROM Faculty f JOIN Assigned_Course ac ON f.f_id = ac.f_id WHERE ac.c_id = ?)";
-//   //   const values = { courseId, courseId, courseId };
-//   connection.query(query, [courseId, courseId, courseId], (err, results) => {
-//     //   connection.query(query, [values], (err, results) => {
-//     if (err) {
-//       console.error("Error executing the query:", err);
-//       res.status(500).json({ error: "Internal Server Error" });
-//       return;
-//     }
-//     res.json(results);
-//   });
-// });
-
-// subtopicRouter.get("/getcommontopictaught3/:c_id/:t_id", (req, res) => {
-//   const courseId = req.params.c_id;
-//   const topicId = req.params.t_id;
-//   const query =
-//     "SELECT CASE WHEN COUNT(DISTINCT tt.f_id) = (SELECT COUNT(DISTINCT f.f_id) FROM Faculty f JOIN Assigned_Course ac ON f.f_id = ac.f_id WHERE ac.c_id = ?) THEN TRUE ELSE FALSE END AS is_taught_by_all FROM TopicTaught tt WHERE tt.t_id = ?";
-//   connection.query(query, [courseId, topicId], (err, results) => {
-//     if (err) {
-//       console.error("Error executing the query:", err);
-//       res.status(500).json({ error: "Internal Server Error" });
-//       return;
-//     }
-//     res.json(results);
-//   });
-// });
 
 // To Add New Topic Taught
 subtopicRouter.post("/addsubtopictaught", (req, res) => {
