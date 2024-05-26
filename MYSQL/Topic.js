@@ -6,15 +6,35 @@ const connection = require("./database");
 topicRouter.use(bodyParser.json());
 
 topicRouter.get("/gettopic/:c_id", (req, res) => {
-  const paperId = req.params.c_id;
+  const courseId = req.params.c_id;
   const query = "SELECT * FROM Topic WHERE c_id = ?";
-  connection.query(query, [paperId], (err, results) => {
+  connection.query(query, [courseId], (err, results) => {
     if (err) {
       console.error("Error executing the query:", err);
       res.status(500).json({ error: "Internal Server Error" });
       return;
     }
     res.json(results);
+  });
+});
+
+topicRouter.get("/getsingletopic/:t_id", (req, res) => {
+  const topicId = req.params.t_id;
+  const query =
+    "SELECT t.t_id, t.t_name, t.c_id, t.status, GROUP_CONCAT(tc.clo_id) AS clo_ids FROM Topic t LEFT JOIN topic_map_clo tc ON t.t_id = tc.t_id WHERE t.t_id = ? GROUP BY t.t_id, t.t_name, t.c_id, t.status";
+  connection.query(query, [topicId], (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+
+    // Format the clo_ids to an array
+    const formattedResults = results.map((row) => ({
+      ...row,
+      clo_ids: row.clo_ids ? row.clo_ids.split(",").map(Number) : []
+    }));
+    res.json(formattedResults);
   });
 });
 
@@ -79,8 +99,7 @@ topicRouter.post("/addtopic", (req, res) => {
 topicRouter.put("/edittopic", (req, res) => {
   const { t_id, t_name, add_clo_ids, remove_clo_ids } = req.body;
 
-  const updateTopicQuery =
-    "UPDATE Topic SET t_name = ? WHERE t_id = ?";
+  const updateTopicQuery = "UPDATE Topic SET t_name = ? WHERE t_id = ?";
   const updateTopicValues = [t_name, t_id];
 
   connection.query(updateTopicQuery, updateTopicValues, (err) => {
@@ -123,6 +142,33 @@ topicRouter.put("/edittopic", (req, res) => {
     res
       .status(200)
       .json({ message: "Topic and mappings updated successfully" });
+  });
+});
+
+topicRouter.put("/enabledisabletopic/:t_id", (req, res) => {
+  const topicId = req.params.t_id;
+  let { status } = req.body;
+  if (status !== "enabled" && status !== "disabled") {
+    return res.status(400).json({
+      error: 'Invalid status value. Status must be either "enable" or "disable"'
+    });
+  }
+  if (status === "enabled") {
+    status = "disabled";
+  } else if (status === "disabled") {
+    status = "enabled";
+  }
+  const query = "UPDATE Topic SET status = ? WHERE t_id = ?";
+  const values = [status, topicId];
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Topic record not found" });
+    }
+    res.status(200).json({ message: "Topic record updated successfully" });
   });
 });
 
