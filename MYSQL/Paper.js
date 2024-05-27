@@ -95,6 +95,35 @@ paperRouter.get("/searchpendingpapers", (req, res) => {
   });
 });
 
+paperRouter.get("/getuploadedpapers", (req, res) => {
+    const query =
+      "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE p.status = ?";
+    const status = "uploaded";
+    connection.query(query, [status], (err, result) => {
+      if (err) {
+        console.error("Error executing the query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
+      }
+      res.status(200).json(result);
+    });
+  });
+
+  paperRouter.get("/searchuploadedpapers", (req, res) => {
+    const searchQuery = req.query.search;
+    const query =
+      "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE c.c_title LIKE ? AND p.status = 'uploaded'";
+    const searchValue = `%${searchQuery}%`;
+    connection.query(query, [searchValue], (err, result) => {
+      if (err) {
+        console.error("Error executing the query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
+      }
+      res.status(200).json(result);
+    });
+  });
+
 paperRouter.put("/editapprovedpaperstatus/:p_id", (req, res) => {
   const paperId = req.params.p_id;
 
@@ -117,7 +146,7 @@ paperRouter.put("/editapprovedpaperstatus/:p_id", (req, res) => {
 
 paperRouter.get("/getprintedpapers", (req, res) => {
   const query =
-    "SELECT Paper.*, Course.c_title FROM Paper INNER JOIN Course ON Paper.c_id = Course.c_id WHERE Paper.status = ?";
+    "SELECT Paper.*, Course.* FROM Paper INNER JOIN Course ON Paper.c_id = Course.c_id WHERE Paper.status = ?";
   const status = "printed";
   connection.query(query, [status], (err, result) => {
     if (err) {
@@ -132,7 +161,7 @@ paperRouter.get("/getprintedpapers", (req, res) => {
 paperRouter.get("/searchprintedpapers", (req, res) => {
   const searchQuery = req.query.search;
   const query =
-    "SELECT Paper.*, Course.c_title FROM Paper INNER JOIN Course ON Paper.c_id = Course.c_id WHERE Course.c_title LIKE ? AND Paper.status = 'printed'";
+    "SELECT Paper.*, Course.* FROM Paper INNER JOIN Course ON Paper.c_id = Course.c_id WHERE Course.c_title LIKE ? AND Paper.status = 'printed'";
   const searchValue = `%${searchQuery}%`;
   connection.query(query, [searchValue, searchValue], (err, result) => {
     if (err) {
