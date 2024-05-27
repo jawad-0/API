@@ -38,6 +38,21 @@ topicRouter.get("/getsingletopic/:t_id", (req, res) => {
   });
 });
 
+topicRouter.get("/searchtopic/:c_id", (req, res) => {
+  const courseId = req.params.c_id;
+  const search = req.query.search || "";
+  const query = "SELECT * FROM Topic WHERE c_id = ? AND t_name LIKE ?";
+  const values = [courseId, `%${search}%`];
+  connection.query(query, values, (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
+  });
+});
+
 // topicRouter.post("/addtopic", (req, res) => {
 //     const { c_id, t_name } = req.body;
 //     const status = "enabled";

@@ -121,3 +121,24 @@ SELECT SUM(weightage1) AS totalWeightage1,
 		 SUM(weightage3) AS totalWeightage3,
 		 SUM(weightage4) AS totalWeightage4
 FROM Grid_View_Weightage_Test WHERE clo_id IN (SELECT clo_id FROM CLO WHERE c_id = 1);
+
+-- Get Sub-Topics Taught
+ SELECT st.*
+      FROM Subtopic st
+      WHERE NOT EXISTS (
+        SELECT ac.f_id
+        FROM Assigned_Course ac
+        WHERE ac.c_id = 1
+          AND ac.f_id NOT IN (
+            SELECT DISTINCT tt.f_id
+            FROM topic_Taught tt
+            WHERE tt.st_id = st.st_id
+          )
+      )
+
+-- Get mapped CLO ids of a topic for update
+SELECT t.t_id, t.t_name, t.c_id, t.status, GROUP_CONCAT(tc.clo_id) AS clo_ids
+    FROM Topic t
+    LEFT JOIN topic_map_clo tc ON t.t_id = tc.t_id
+    WHERE t.t_id = 22
+    GROUP BY t.t_id, t.t_name, t.c_id, t.status;

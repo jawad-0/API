@@ -18,6 +18,50 @@ subtopicRouter.get("/getsubtopic/:t_id", (req, res) => {
   });
 });
 
+subtopicRouter.get("/searchsubtopic/:t_id", (req, res) => {
+    const topicId = req.params.t_id;
+    const search = req.query.search || "";
+    const query = "SELECT * FROM SubTopic WHERE t_id = ? AND st_name LIKE ?";
+    const values = [topicId, `%${search}%`];
+    connection.query(query, values, (err, results) => {
+      if (err) {
+        console.error("Error executing the query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
+      }
+      res.json(results);
+    });
+  });
+
+subtopicRouter.post("/addsubtopic", (req, res) => {
+  const { t_id, st_name } = req.body;
+  const query = "INSERT INTO SubTopic (t_id, st_name) VALUES (?, ?)";
+  const values = [t_id, st_name];
+  connection.query(query, values, (err) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.status(200).json({ message: "SubTopic added successfully" });
+  });
+});
+
+subtopicRouter.put("/editsubtopic", (req, res) => {
+  const { st_id, st_name } = req.body;
+  const query = "UPDATE SubTopic SET st_name = ? WHERE st_id = ?";
+  const values = [st_name, st_id];
+
+  connection.query(query, values, (err) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.status(200).json({ message: "SubTopic updated successfully" });
+  });
+});
+
 subtopicRouter.get("/getsubtopictaught/:f_id", (req, res) => {
   const facultyId = req.params.f_id;
   const query = "SELECT * FROM Topic_Taught WHERE f_id = ?";
@@ -45,7 +89,6 @@ subtopicRouter.get("/getcommonsubtopictaught/:c_id", (req, res) => {
     res.json(results);
   });
 });
-
 
 // To Add New Topic Taught
 subtopicRouter.post("/addsubtopictaught", (req, res) => {
