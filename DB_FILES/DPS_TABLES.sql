@@ -19,7 +19,13 @@ USE dps;
 CREATE TABLE Session (
     s_id INT AUTO_INCREMENT PRIMARY KEY,
     s_name VARCHAR(20) NOT NULL,
-    flag BIT NOT NULL
+    year INT NOT NULL,
+    flag BIT(1) NOT NULL
+);
+CREATE TABLE Difficulty (
+    d_id INT PRIMARY KEY,
+    difficulty VARCHAR(20) NOT NULL,
+    number INT NOT NULL
 );
 CREATE TABLE Faculty (
     f_id INT AUTO_INCREMENT PRIMARY KEY,

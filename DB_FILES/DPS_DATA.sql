@@ -1,6 +1,12 @@
 -- Session
 INSERT INTO Session (s_name, flag) VALUES ('F-23', 1);
 
+-- Difficulty
+INSERT INTO Difficulty (d_id, difficulty, number)
+VALUES (1, 'Easy', 2),
+       (2, 'Medium', 2),
+       (3, 'Hard', 1);
+
 -- Course
 INSERT INTO Course (c_code, c_title, cr_hours, status)
 VALUES ('CSC-101', 'Programming Fundamentals', 4, 'enabled'),

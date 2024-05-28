@@ -9,6 +9,7 @@ const feedbackRoutes = require("./Feedback");
 const questionRoutes = require("./Question");
 const topicRoutes = require("./Topic");
 const subtopicRoutes = require("./SubTopic");
+const difficultyRouter = require("./Difficulty");
 
 const app = express();
 const port = 8000;
@@ -26,6 +27,7 @@ app.use("/", feedbackRoutes);
 app.use("/", questionRoutes);
 app.use("/", topicRoutes);
 app.use("/", subtopicRoutes);
+app.use("/", difficultyRouter);
 
 app.use((req, res, next) => {
     console.log(`Incoming Request: ${req.method} ${req.url}`);
