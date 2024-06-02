@@ -259,11 +259,11 @@ INSERT INTO feedback (feedback_details, p_id, c_id, q_id) VALUES
 		 ('Change Question # 20', 20, 10, NULL);
 
 INSERT INTO question (q_text, q_image, q_marks, q_difficulty, q_status, t_id, p_id, f_id) VALUES
-		 ('What is meant by Programming?', NULL, 10, 'Easy', 'pending', NULL, 1, 1),
-         ('What is meant by Programming?', NULL, 15, 'Easy', 'pending', NULL, 1, 1),
-         ('What is meant by Programming?', NULL, 10, 'Medium', 'pending', NULL, 1, 1),
-         ('What is meant by Programming?', NULL, 15, 'Medium', 'pending', NULL, 1, 1),
-         ('What is meant by Programming?', NULL, 20, 'Hard', 'pending', NULL, 1, 1);
+		 ('What is meant by Programming?', 1, 10, 'Easy', 'pending', NULL, 1, 1),
+         ('What is meant by Programming?', 2, 15, 'Easy', 'pending', NULL, 1, 1),
+         ('What is meant by Programming?', 3, 10, 'Medium', 'pending', NULL, 1, 1),
+         ('What is meant by Programming?', 4, 15, 'Medium', 'pending', NULL, 1, 1),
+         ('What is meant by Programming?', 5, 20, 'Hard', 'pending', NULL, 1, 1);
 
 INSERT INTO topic (t_id, t_name, c_id, status) VALUES
          (1, 'Basic Structure of Programming', 1, 'enabled'),

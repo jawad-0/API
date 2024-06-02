@@ -82,7 +82,8 @@ paperRouter.post("/addPaper", (req, res) => {
       return;
     }
     const { s_id, s_name, year } = sessionResult[0];
-    const checkTermQuery = "SELECT * FROM Paper WHERE term = ? AND c_id = ? AND s_id = ?";
+    const checkTermQuery =
+      "SELECT * FROM Paper WHERE term = ? AND c_id = ? AND s_id = ?";
     connection.query(
       checkTermQuery,
       [term.toLowerCase(), c_id, s_id],
@@ -126,6 +127,35 @@ paperRouter.post("/addPaper", (req, res) => {
         });
       }
     );
+  });
+});
+
+// To Edit Paper
+paperRouter.put("/editPaper/:id", (req, res) => {
+  const paperID = req.params.id;
+  const { degree, exam_date, duration } = req.body;
+  const checkPaperQuery = "SELECT * FROM Paper WHERE p_id = ?";
+  connection.query(checkPaperQuery, [paperID], (err, existingPaper) => {
+    if (err) {
+      console.error("Error executing the check query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    if (existingPaper.length === 0) {
+      res.status(404).json({ error: "Paper not found" });
+      return;
+    }
+    const updateQuery =
+      "UPDATE Paper SET degree = ?, exam_date = ?, duration = ? WHERE p_id = ?";
+    const values = [degree, exam_date, duration, paperID];
+    connection.query(updateQuery, values, (err) => {
+      if (err) {
+        console.error("Error executing the update query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
+      }
+      res.status(200).json({ message: "Paper updated successfully" });
+    });
   });
 });
 

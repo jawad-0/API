@@ -122,7 +122,7 @@ CREATE TABLE Question (
     q_image LONGTEXT,
     q_marks INT NOT NULL,
     q_difficulty VARCHAR(10) NOT NULL,
-    q_status VARCHAR(10) NOT NULL,
+    q_status VARCHAR(20) NOT NULL,
     t_id INT NOT NULL,
     p_id INT NOT NULL,
     f_id INT NOT NULL,
