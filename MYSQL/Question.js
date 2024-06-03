@@ -80,7 +80,7 @@ questionRouter.post("/addQuestion", upload.single("q_image"), (req, res) => {
   const { q_text, q_marks, q_difficulty, f_name, t_id, p_id, f_id } = req.body;
   console.log(f_name);
   const q_status = "pending";
-  const q_image = req.file.path;
+  const q_image = req.file ? req.file.path : null;
 
   const query =
     "INSERT INTO Question (q_text, q_image, q_marks, q_difficulty, q_status, f_name, t_id, p_id, f_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
