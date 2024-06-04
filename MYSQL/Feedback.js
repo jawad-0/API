@@ -53,14 +53,14 @@ feedbackRouter.get("/getFeedback/:f_id", (req, res) => {
 
 // To Add New Course
 feedbackRouter.post("/addfeedback", (req, res) => {
-  const { feedback, p_id, c_id, q_id } = req.body;
+  const { fb_text, p_id, c_id, q_id } = req.body;
   if (p_id === null || c_id === null) {
     res.status(400).json({ error: "p_id and c_id cannot be null" });
     return;
   }
   const query =
-    "INSERT INTO Feedback (feedback_details, p_id, c_id, q_id) VALUES (?, ?, ?, ?)";
-  const values = [feedback, p_id, c_id, q_id];
+    "INSERT INTO Feedback (fb_text, p_id, c_id, q_id) VALUES (?, ?, ?, ?)";
+  const values = [fb_text, p_id, c_id, q_id];
   connection.query(query, values, (err) => {
     if (err) {
       console.error("Error executing the query:", err);
