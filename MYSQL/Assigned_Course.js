@@ -14,22 +14,39 @@ assignedCoursesRouter.get("/getAssignedCourses/:f_id", async (req, res) => {
     if (!/^\d+$/.test(userId)) {
       return res.status(400).json({ error: "Invalid faculty ID" });
     }
-    // const getAssignedCoursesQuery =
-    //   "SELECT ac.ac_id, f.f_name AS 'TeacherName', c.c_title AS 'CourseTitle', c.c_code AS 'CourseCode' FROM faculty f JOIN Assigned_Course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE f.f_id = ?";
-    const getAssignedCoursesQuery =
-      "SELECT ac.*, f.f_name, c.c_title, c.c_code FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE f.f_id = ?";
-
-    connection.query(getAssignedCoursesQuery, [userId], (err, result) => {
+    const sessionQuery = "SELECT s_id FROM Session WHERE flag = 'active'";
+    connection.query(sessionQuery, (err, sessionResult) => {
       if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Query error" });
+        console.error("Error executing the session query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
       }
-      if (result.length === 0) {
-        return res
-          .status(404)
-          .json({ error: "Data not found for the given ID" });
+      if (sessionResult.length === 0) {
+        res.status(404).json({ error: "No active session found" });
+        return;
       }
-      res.json(result);
+      const { s_id } = sessionResult[0];
+      // const getAssignedCoursesQuery =
+      //   "SELECT ac.ac_id, f.f_name AS 'TeacherName', c.c_title AS 'CourseTitle', c.c_code AS 'CourseCode' FROM faculty f JOIN Assigned_Course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE f.f_id = ?";
+      const getAssignedCoursesQuery =
+        "SELECT ac.*, f.f_name, c.c_title, c.c_code FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE f.f_id = ? AND s_id = ?";
+
+      connection.query(
+        getAssignedCoursesQuery,
+        [userId, s_id],
+        (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Query error" });
+          }
+          if (result.length === 0) {
+            return res
+              .status(404)
+              .json({ error: "Data not found for the given ID" });
+          }
+          res.json(result);
+        }
+      );
     });
   } catch (err) {
     console.error(err);
@@ -44,20 +61,37 @@ assignedCoursesRouter.get("/getUnassignedCourses/:f_id", async (req, res) => {
     if (!/^\d+$/.test(userId)) {
       return res.status(400).json({ error: "Invalid faculty ID" });
     }
-    const getUnassignedCoursesQuery =
-      "SELECT c.* FROM course c LEFT JOIN assigned_course ac ON c.c_id = ac.c_id AND ac.f_id = ? WHERE ac.ac_id IS NULL;";
-
-    connection.query(getUnassignedCoursesQuery, [userId], (err, result) => {
+    const sessionQuery = "SELECT s_id FROM Session WHERE flag = 'active'";
+    connection.query(sessionQuery, (err, sessionResult) => {
       if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Query error" });
+        console.error("Error executing the session query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
       }
-      if (result.length === 0) {
-        return res
-          .status(404)
-          .json({ error: "Data not found for the given ID" });
+      if (sessionResult.length === 0) {
+        res.status(404).json({ error: "No active session found" });
+        return;
       }
-      res.json(result);
+      const { s_id } = sessionResult[0];
+      const getUnassignedCoursesQuery =
+        "SELECT c.* FROM course c LEFT JOIN assigned_course ac ON c.c_id = ac.c_id AND ac.f_id = ? AND ac.s_id = ? WHERE ac.ac_id IS NULL";
+
+      connection.query(
+        getUnassignedCoursesQuery,
+        [userId, s_id],
+        (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Query error" });
+          }
+          if (result.length === 0) {
+            return res
+              .status(404)
+              .json({ error: "Data not found for the given ID" });
+          }
+          res.json(result);
+        }
+      );
     });
   } catch (err) {
     console.error(err);
@@ -72,20 +106,33 @@ assignedCoursesRouter.get("/getAssignedTo/:c_id", async (req, res) => {
     if (!/^\d+$/.test(userId)) {
       return res.status(400).json({ error: "Invalid course ID" });
     }
-    const getAssignedToQuery =
-      "SELECT ac.*, f.f_name, c.c_title, c.c_code FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE c.c_id = ?";
-
-    connection.query(getAssignedToQuery, [userId], (err, result) => {
+    const sessionQuery = "SELECT s_id FROM Session WHERE flag = 'active'";
+    connection.query(sessionQuery, (err, sessionResult) => {
       if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Query error" });
+        console.error("Error executing the session query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
       }
-      if (result.length === 0) {
-        return res
-          .status(404)
-          .json({ error: "Data not found for the given ID" });
+      if (sessionResult.length === 0) {
+        res.status(404).json({ error: "No active session found" });
+        return;
       }
-      res.json(result);
+      const { s_id } = sessionResult[0];
+      const getAssignedToQuery =
+        "SELECT ac.*, f.f_name, c.c_title, c.c_code FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE c.c_id = ? AND ac.s_id = ?";
+
+      connection.query(getAssignedToQuery, [userId, s_id], (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Query error" });
+        }
+        if (result.length === 0) {
+          return res
+            .status(404)
+            .json({ error: "Data not found for the given ID" });
+        }
+        res.json(result);
+      });
     });
   } catch (err) {
     console.error(err);
@@ -100,20 +147,33 @@ assignedCoursesRouter.get("/getPaperStatus/:f_id", async (req, res) => {
     if (!/^\d+$/.test(userId)) {
       return res.status(400).json({ error: "Invalid faculty ID" });
     }
-    const getPaperStatusQuery =
-      "SELECT c.c_title , p.status FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id LEFT JOIN Paper p ON c.c_id = p.c_id WHERE f.f_id = ?";
-
-    connection.query(getPaperStatusQuery, [userId], (err, result) => {
+    const sessionQuery = "SELECT s_id FROM Session WHERE flag = 'active'";
+    connection.query(sessionQuery, (err, sessionResult) => {
       if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Query error" });
+        console.error("Error executing the session query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
       }
-      if (result.length === 0) {
-        return res
-          .status(404)
-          .json({ error: "Data not found for the given ID" });
+      if (sessionResult.length === 0) {
+        res.status(404).json({ error: "No active session found" });
+        return;
       }
-      res.json(result);
+      const { s_id } = sessionResult[0];
+      const getPaperStatusQuery =
+        "SELECT c.c_title , p.status FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id LEFT JOIN Paper p ON c.c_id = p.c_id AND p.s_id = ac.s_id WHERE f.f_id = ? AND ac.s_id = ?";
+
+      connection.query(getPaperStatusQuery, [userId, s_id], (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Query error" });
+        }
+        if (result.length === 0) {
+          return res
+            .status(404)
+            .json({ error: "Data not found for the given ID" });
+        }
+        res.json(result);
+      });
     });
   } catch (err) {
     console.error(err);
@@ -131,18 +191,30 @@ assignedCoursesRouter.post("/assignCourse/:c_id/:f_id", (req, res) => {
   if (!/^\d+$/.test(f_id)) {
     return res.status(400).json({ error: "Invalid faculty ID" });
   }
-  const role = "junior";
-  const session = 1;
-  const query =
-    "INSERT INTO Assigned_Course (c_id, f_id, role, s_id) VALUES (?, ?, ?, ?)";
-  const values = [c_id, f_id, role, session];
-  connection.query(query, values, (err) => {
+  const sessionQuery = "SELECT s_id FROM Session WHERE flag = 'active'";
+  connection.query(sessionQuery, (err, sessionResult) => {
     if (err) {
-      console.error("Error executing the query:", err);
+      console.error("Error executing the session query:", err);
       res.status(500).json({ error: "Internal Server Error" });
       return;
     }
-    res.status(200).json({ message: "Course assigned successfully" });
+    if (sessionResult.length === 0) {
+      res.status(404).json({ error: "No active session found" });
+      return;
+    }
+    const { s_id } = sessionResult[0];
+    const role = "junior";
+    const query =
+      "INSERT INTO Assigned_Course (c_id, f_id, role, s_id) VALUES (?, ?, ?, ?)";
+    const values = [c_id, f_id, role, s_id];
+    connection.query(query, values, (err) => {
+      if (err) {
+        console.error("Error executing the query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
+      }
+      res.status(200).json({ message: "Course assigned successfully" });
+    });
   });
 });
 
@@ -179,15 +251,28 @@ assignedCoursesRouter.put("/editRole/:c_id/:f_id", async (req, res) => {
     if (!/^\d+$/.test(f_id)) {
       return res.status(400).json({ error: "Invalid faculty ID" });
     }
-    const editStatusQuery =
-      "UPDATE Assigned_Course SET role = CASE WHEN f_id = ? THEN 'senior' ELSE 'junior' END WHERE c_id = ?";
-
-    connection.query(editStatusQuery, [f_id, c_id], (err, result) => {
+    const sessionQuery = "SELECT s_id FROM Session WHERE flag = 'active'";
+    connection.query(sessionQuery, (err, sessionResult) => {
       if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Query error" });
+        console.error("Error executing the session query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
       }
-      res.json({ message: "Role updated successfully" });
+      if (sessionResult.length === 0) {
+        res.status(404).json({ error: "No active session found" });
+        return;
+      }
+      const { s_id } = sessionResult[0];
+      const editStatusQuery =
+        "UPDATE Assigned_Course SET role = CASE WHEN f_id = ? THEN 'senior' ELSE 'junior' END WHERE c_id = ? AND s_id = ?";
+
+      connection.query(editStatusQuery, [f_id, c_id, s_id], (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Query error" });
+        }
+        res.json({ message: "Role updated successfully" });
+      });
     });
   } catch (error) {
     res.status(500).json({ error: "Get Request Error" });

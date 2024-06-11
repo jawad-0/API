@@ -44,15 +44,17 @@ cloRouter.get("/getCLO/:c_id", async (req, res) => {
 cloRouter.put("/approvedisapproveCLO/:clo_id", (req, res) => {
   const CLOId = req.params.clo_id;
   let { status } = req.body;
-  if (status !== "approved" && status !== "disapproved") {
+  if (status !== "approved" && status !== "disapproved" && status !== "pending") {
     return res.status(400).json({
       error:
-        'Invalid status value. Status must be either "approved" or "disapproved"'
+        'Invalid status value. Status must be either "approved", "disapproved" or "pending"'
     });
   }
   if (status === "approved") {
     status = "disapproved";
   } else if (status === "disapproved") {
+    status = "approved";
+  } else if (status === "pending") {
     status = "approved";
   }
   const query = "UPDATE clo SET status = ? WHERE clo_id = ?";
