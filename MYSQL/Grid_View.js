@@ -5,7 +5,13 @@ const gridviewRouter = express.Router();
 const connection = require("./database");
 gridviewRouter.use(bodyParser.json());
 
-// To get Grid_View_Headers
+// Routes >>>
+// GET  -> getGridViewHeaders
+// GET  -> getCourseGridViewWeightage/:c_id
+// GET  -> getCLOGridViewWeightage/:clo_id
+// PUT  -> addGridViewWeightage
+
+// GET endpoint
 gridviewRouter.get("/getGridViewHeaders", (req, res) => {
   const getQuery = "SELECT * FROM Grid_View_Headers";
   connection.query(getQuery, (err, results) => {
@@ -18,7 +24,36 @@ gridviewRouter.get("/getGridViewHeaders", (req, res) => {
   });
 });
 
-// To Add New Grid_View_Weightage
+// GET endpoint
+gridviewRouter.get("/getCourseGridViewWeightage/:c_id", (req, res) => {
+  const c_id = req.params.c_id;
+  const getQuery =
+    "SELECT gvwt.*, CLO.clo_number FROM Course JOIN CLO ON Course.c_id = CLO.c_id JOIN Grid_View_Weightage gvwt ON CLO.clo_id = gvwt.clo_id WHERE Course.c_id = ? ORDER BY CLO.CLO_number ASC";
+  connection.query(getQuery, c_id, (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+// GET endpoint
+gridviewRouter.get("/getCLOGridViewWeightage/:clo_id", (req, res) => {
+  const clo_id = req.params.clo_id;
+  const getQuery = "SELECT * FROM Grid_View_Weightage WHERE clo_id = ?";
+  connection.query(getQuery, clo_id, (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+// PUT endpoint
 gridviewRouter.put("/addGridViewWeightage", (req, res) => {
   const { clo_id, weightage1, weightage2, weightage3, weightage4 } = req.body;
   console.log(weightage1, weightage2, weightage3, weightage4);
@@ -156,35 +191,6 @@ gridviewRouter.put("/addGridViewWeightage", (req, res) => {
       );
     }
   );
-});
-
-// To Get Grid_View_Weightage of 1 CLO
-gridviewRouter.get("/getCLOGridViewWeightage/:clo_id", (req, res) => {
-  const clo_id = req.params.clo_id;
-  const getQuery = "SELECT * FROM Grid_View_Weightage WHERE clo_id = ?";
-  connection.query(getQuery, clo_id, (err, results) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.json(results);
-  });
-});
-
-// To Get Grid_View_Weightage of Course
-gridviewRouter.get("/getCourseGridViewWeightage/:c_id", (req, res) => {
-  const c_id = req.params.c_id;
-  const getQuery =
-    "SELECT gvwt.*, CLO.clo_number FROM Course JOIN CLO ON Course.c_id = CLO.c_id JOIN Grid_View_Weightage gvwt ON CLO.clo_id = gvwt.clo_id WHERE Course.c_id = ? ORDER BY CLO.CLO_number ASC";
-  connection.query(getQuery, c_id, (err, results) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.json(results);
-  });
 });
 
 // To Edit Existing Grid_View_Weightage

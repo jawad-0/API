@@ -3,15 +3,14 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const cloRouter = express.Router();
 const connection = require("./database");
+cloRouter.use(bodyParser.json());
 
-const getQuery = "SELECT * FROM CLO WHERE c_id = @c_id";
-
-const postQuery =
-  "INSERT INTO CLO (clo_id, c_id, clo_text, status) VALUES (@clo_id, @c_id, @clo_text, @status)";
-
-const editQuery = "UPDATE CLO SET clo_text = @clo_text WHERE clo_id = @clo_id";
-
-const editStatusQuery = "UPDATE CLO SET status = @status WHERE c_id = @c_id";
+// Routes >>>
+// GET  -> getCLO/:c_id
+// GET  -> getApprovedCLO/:c_id
+// POST -> addCLO
+// PUT  -> approvedisapproveCLO/:clo_id
+// PUT  -> editCLO/:clo_id
 
 // GET endpoint
 cloRouter.get("/getCLO/:c_id", async (req, res) => {
@@ -67,81 +66,7 @@ cloRouter.get("/getApprovedCLO/:c_id", async (req, res) => {
   }
 });
 
-// EDIT endpoint
-cloRouter.put("/approvedisapproveCLO/:clo_id", (req, res) => {
-  const CLOId = req.params.clo_id;
-  let { status } = req.body;
-  if (
-    status !== "approved" &&
-    status !== "disapproved" &&
-    status !== "pending"
-  ) {
-    return res.status(400).json({
-      error:
-        'Invalid status value. Status must be either "approved", "disapproved" or "pending"'
-    });
-  }
-  if (status === "approved") {
-    status = "disapproved";
-  } else if (status === "disapproved") {
-    status = "approved";
-  } else if (status === "pending") {
-    status = "approved";
-  }
-  const query = "UPDATE clo SET status = ? WHERE clo_id = ?";
-  const values = [status, CLOId];
-  connection.query(query, values, (err, result) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "CLO record not found" });
-    }
-    res.status(200).json({ message: "CLO status updated successfully" });
-  });
-});
-
 // POST endpoint
-// cloRouter.post("/addCLO", async (req, res) => {
-//   try {
-//     const { clo_id, c_id, clo_text } = req.body;
-//     const initialStatus = "pending";
-//     await pool.connect();
-//     await pool
-//       .request()
-//       .input("clo_id", sql.Int, clo_id)
-//       .input("c_id", sql.Int, c_id)
-//       .input("clo_text", sql.NVarChar(255), clo_text)
-//       .input("status", sql.NVarChar(255), initialStatus)
-//       .query(postQuery);
-//     res.status(200).json({ message: "CLO inserted successfully" });
-//   } catch (error) {
-//     console.error("Error inserting data:", error);
-//     res.status(500).json({ error: "Post Request Error" });
-//   } finally {
-//     pool.close();
-//   }
-// });
-
-// To Add New CLO
-// cloRouter.post("/addCLO", async (req, res) => {
-//     const { c_id, clo_number, clo_text } = req.body;
-//     const status = "pending";
-//     const query =
-//       "INSERT INTO CLO (c_id, clo_number, clo_text, status) VALUES (?, ?, ?, ?)";
-//     const values = [c_id, clo_number, clo_text, status];
-//     connection.query(query, values, (err) => {
-//       if (err) {
-//         console.error("Error executing the query:", err);
-//         res.status(500).json({ error: "Internal Server Error" });
-//         return;
-//       }
-//       res.status(200).json({ message: "CLO added successfully" });
-//     });
-//   });
-
-// To Add New CLO
 cloRouter.post("/addCLO", async (req, res) => {
   try {
     const { c_id, clo_number, clo_text } = req.body;
@@ -181,7 +106,42 @@ cloRouter.post("/addCLO", async (req, res) => {
   }
 });
 
-// EDIT endpoint
+// PUT endpoint
+cloRouter.put("/approvedisapproveCLO/:clo_id", (req, res) => {
+  const CLOId = req.params.clo_id;
+  let { status } = req.body;
+  if (
+    status !== "approved" &&
+    status !== "disapproved" &&
+    status !== "pending"
+  ) {
+    return res.status(400).json({
+      error:
+        'Invalid status value. Status must be either "approved", "disapproved" or "pending"'
+    });
+  }
+  if (status === "approved") {
+    status = "disapproved";
+  } else if (status === "disapproved") {
+    status = "approved";
+  } else if (status === "pending") {
+    status = "approved";
+  }
+  const query = "UPDATE clo SET status = ? WHERE clo_id = ?";
+  const values = [status, CLOId];
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "CLO record not found" });
+    }
+    res.status(200).json({ message: "CLO status updated successfully" });
+  });
+});
+
+// PUT endpoint
 cloRouter.put("/editCLO/:clo_id", async (req, res) => {
   try {
     const { clo_id } = req.params;
@@ -223,86 +183,127 @@ cloRouter.put("/editCLO/:clo_id", async (req, res) => {
   }
 });
 
-// EDIT STATUS endpoint
-cloRouter.put("/setStatusApproved/:c_id", async (req, res) => {
-  try {
-    const userId = req.params.c_id;
-    if (!/^\d+$/.test(userId)) {
-      return res.status(400).json({ error: "Invalid course ID" });
-    }
-    await pool.connect();
-    const fetchResult = await pool
-      .request()
-      .input("c_id", sql.Int, userId)
-      .query(getQuery);
-    if (fetchResult.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: "Course not found" });
-    }
-    const currentStatus = fetchResult.recordset[0].status;
-    let newStatus;
-    if (currentStatus === "pending") {
-      newStatus = "approved";
-    } else if (currentStatus === "disapproved") {
-      newStatus = "approved";
-    }
-    const updateResult = await pool
-      .request()
-      .input("c_id", sql.Int, userId)
-      .input("status", sql.NVarChar(255), newStatus)
-      .query(editStatusQuery);
-    if (updateResult.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: "Course not found" });
-    }
-    res
-      .status(200)
-      .json({ message: "Course status updated successfully", newStatus });
-  } catch (error) {
-    console.error("Error updating course status:", error);
-    res.status(500).json({ error: "Edit Status Request Error" });
-  } finally {
-    pool.close();
-  }
-});
+// const getQuery = "SELECT * FROM CLO WHERE c_id = @c_id";
+// const editStatusQuery = "UPDATE CLO SET status = @status WHERE c_id = @c_id";
 
-// EDIT STATUS endpoint
-cloRouter.put("/setStatusDisapproved/:c_id", async (req, res) => {
-  try {
-    const userId = req.params.c_id;
-    if (!/^\d+$/.test(userId)) {
-      return res.status(400).json({ error: "Invalid course ID" });
-    }
-    await pool.connect();
-    const fetchResult = await pool
-      .request()
-      .input("c_id", sql.Int, userId)
-      .query(getQuery);
-    if (fetchResult.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: "Course not found" });
-    }
-    const currentStatus = fetchResult.recordset[0].status;
-    let newStatus;
-    if (currentStatus === "pending") {
-      newStatus = "disapproved";
-    } else if (currentStatus === "approved") {
-      newStatus = "disapproved";
-    }
-    const updateResult = await pool
-      .request()
-      .input("c_id", sql.Int, userId)
-      .input("status", sql.NVarChar(255), newStatus)
-      .query(editStatusQuery);
-    if (updateResult.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: "Course not found" });
-    }
-    res
-      .status(200)
-      .json({ message: "Course status updated successfully", newStatus });
-  } catch (error) {
-    console.error("Error updating course status:", error);
-    res.status(500).json({ error: "Edit Status Request Error" });
-  } finally {
-    pool.close();
-  }
-});
+// POST endpoint
+// cloRouter.post("/addCLO", async (req, res) => {
+//   try {
+//     const { clo_id, c_id, clo_text } = req.body;
+//     const initialStatus = "pending";
+//     await pool.connect();
+//     await pool
+//       .request()
+//       .input("clo_id", sql.Int, clo_id)
+//       .input("c_id", sql.Int, c_id)
+//       .input("clo_text", sql.NVarChar(255), clo_text)
+//       .input("status", sql.NVarChar(255), initialStatus)
+//       .query(postQuery);
+//     res.status(200).json({ message: "CLO inserted successfully" });
+//   } catch (error) {
+//     console.error("Error inserting data:", error);
+//     res.status(500).json({ error: "Post Request Error" });
+//   } finally {
+//     pool.close();
+//   }
+// });
+// To Add New CLO
+// cloRouter.post("/addCLO", async (req, res) => {
+//     const { c_id, clo_number, clo_text } = req.body;
+//     const status = "pending";
+//     const query =
+//       "INSERT INTO CLO (c_id, clo_number, clo_text, status) VALUES (?, ?, ?, ?)";
+//     const values = [c_id, clo_number, clo_text, status];
+//     connection.query(query, values, (err) => {
+//       if (err) {
+//         console.error("Error executing the query:", err);
+//         res.status(500).json({ error: "Internal Server Error" });
+//         return;
+//       }
+//       res.status(200).json({ message: "CLO added successfully" });
+//     });
+//   });
+
+// EDIT endpoint
+// cloRouter.put("/setStatusApproved/:c_id", async (req, res) => {
+//   try {
+//     const userId = req.params.c_id;
+//     if (!/^\d+$/.test(userId)) {
+//       return res.status(400).json({ error: "Invalid course ID" });
+//     }
+//     await pool.connect();
+//     const fetchResult = await pool
+//       .request()
+//       .input("c_id", sql.Int, userId)
+//       .query(getQuery);
+//     if (fetchResult.rowsAffected[0] === 0) {
+//       return res.status(404).json({ error: "Course not found" });
+//     }
+//     const currentStatus = fetchResult.recordset[0].status;
+//     let newStatus;
+//     if (currentStatus === "pending") {
+//       newStatus = "approved";
+//     } else if (currentStatus === "disapproved") {
+//       newStatus = "approved";
+//     }
+//     const updateResult = await pool
+//       .request()
+//       .input("c_id", sql.Int, userId)
+//       .input("status", sql.NVarChar(255), newStatus)
+//       .query(editStatusQuery);
+//     if (updateResult.rowsAffected[0] === 0) {
+//       return res.status(404).json({ error: "Course not found" });
+//     }
+//     res
+//       .status(200)
+//       .json({ message: "Course status updated successfully", newStatus });
+//   } catch (error) {
+//     console.error("Error updating course status:", error);
+//     res.status(500).json({ error: "Edit Status Request Error" });
+//   } finally {
+//     pool.close();
+//   }
+// });
+
+// EDIT endpoint
+// cloRouter.put("/setStatusDisapproved/:c_id", async (req, res) => {
+//   try {
+//     const userId = req.params.c_id;
+//     if (!/^\d+$/.test(userId)) {
+//       return res.status(400).json({ error: "Invalid course ID" });
+//     }
+//     await pool.connect();
+//     const fetchResult = await pool
+//       .request()
+//       .input("c_id", sql.Int, userId)
+//       .query(getQuery);
+//     if (fetchResult.rowsAffected[0] === 0) {
+//       return res.status(404).json({ error: "Course not found" });
+//     }
+//     const currentStatus = fetchResult.recordset[0].status;
+//     let newStatus;
+//     if (currentStatus === "pending") {
+//       newStatus = "disapproved";
+//     } else if (currentStatus === "approved") {
+//       newStatus = "disapproved";
+//     }
+//     const updateResult = await pool
+//       .request()
+//       .input("c_id", sql.Int, userId)
+//       .input("status", sql.NVarChar(255), newStatus)
+//       .query(editStatusQuery);
+//     if (updateResult.rowsAffected[0] === 0) {
+//       return res.status(404).json({ error: "Course not found" });
+//     }
+//     res
+//       .status(200)
+//       .json({ message: "Course status updated successfully", newStatus });
+//   } catch (error) {
+//     console.error("Error updating course status:", error);
+//     res.status(500).json({ error: "Edit Status Request Error" });
+//   } finally {
+//     pool.close();
+//   }
+// });
 
 module.exports = cloRouter;

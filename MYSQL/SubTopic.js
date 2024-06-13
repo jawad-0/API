@@ -5,6 +5,17 @@ const subtopicRouter = express.Router();
 const connection = require("./database");
 subtopicRouter.use(bodyParser.json());
 
+// Routes >>>
+// GET  -> getsubtopic/:t_id
+// GET  -> searchsubtopic/:t_id
+// POST -> addsubtopic
+// PUT  -> editsubtopic
+// GET  -> getsubtopictaught/:f_id
+// GET  -> getcommonsubtopictaught/:c_id
+// POST -> addsubtopictaught
+// DEL  -> deletesubtopictaught
+
+// GET endpoint
 subtopicRouter.get("/getsubtopic/:t_id", (req, res) => {
   const topicId = req.params.t_id;
   const query = "SELECT * FROM SubTopic WHERE t_id = ?";
@@ -18,21 +29,23 @@ subtopicRouter.get("/getsubtopic/:t_id", (req, res) => {
   });
 });
 
+// GET endpoint
 subtopicRouter.get("/searchsubtopic/:t_id", (req, res) => {
-    const topicId = req.params.t_id;
-    const search = req.query.search || "";
-    const query = "SELECT * FROM SubTopic WHERE t_id = ? AND st_name LIKE ?";
-    const values = [topicId, `%${search}%`];
-    connection.query(query, values, (err, results) => {
-      if (err) {
-        console.error("Error executing the query:", err);
-        res.status(500).json({ error: "Internal Server Error" });
-        return;
-      }
-      res.json(results);
-    });
+  const topicId = req.params.t_id;
+  const search = req.query.search || "";
+  const query = "SELECT * FROM SubTopic WHERE t_id = ? AND st_name LIKE ?";
+  const values = [topicId, `%${search}%`];
+  connection.query(query, values, (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
   });
+});
 
+// POST endpoint
 subtopicRouter.post("/addsubtopic", (req, res) => {
   const { t_id, st_name } = req.body;
   const query = "INSERT INTO SubTopic (t_id, st_name) VALUES (?, ?)";
@@ -47,6 +60,7 @@ subtopicRouter.post("/addsubtopic", (req, res) => {
   });
 });
 
+// PUT endpoint
 subtopicRouter.put("/editsubtopic", (req, res) => {
   const { st_id, st_name } = req.body;
   const query = "UPDATE SubTopic SET st_name = ? WHERE st_id = ?";
@@ -62,6 +76,7 @@ subtopicRouter.put("/editsubtopic", (req, res) => {
   });
 });
 
+// GET endpoint
 subtopicRouter.get("/getsubtopictaught/:f_id", (req, res) => {
   const facultyId = req.params.f_id;
   const query = "SELECT * FROM Topic_Taught WHERE f_id = ?";
@@ -76,6 +91,7 @@ subtopicRouter.get("/getsubtopictaught/:f_id", (req, res) => {
   });
 });
 
+// GET endpoint
 subtopicRouter.get("/getcommonsubtopictaught/:c_id", (req, res) => {
   const courseId = req.params.c_id;
   const query =
@@ -90,7 +106,7 @@ subtopicRouter.get("/getcommonsubtopictaught/:c_id", (req, res) => {
   });
 });
 
-// To Add New Topic Taught
+// POST endpoint
 subtopicRouter.post("/addsubtopictaught", (req, res) => {
   const { f_id, t_id, st_id } = req.body;
   const query = "INSERT INTO Topic_Taught (f_id, t_id, st_id) VALUES (?, ?, ?)";
@@ -105,7 +121,7 @@ subtopicRouter.post("/addsubtopictaught", (req, res) => {
   });
 });
 
-// To Delete Topic Taught
+// DELETE endpoint
 subtopicRouter.delete("/deletesubtopictaught", (req, res) => {
   const { st_id, f_id } = req.body;
   if (!/^\d+$/.test(st_id)) {

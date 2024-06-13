@@ -8,18 +8,12 @@ const path = require("path");
 const fs = require("fs");
 questionRouter.use(bodyParser.json());
 
-// Set up multer storage engine
-// const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, "uploads/");
-//   },
-//   filename: function (req, file, cb) {
-//     cb(
-//       null,
-//       file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-//     );
-//   }
-// });
+// Routes >>>
+// GET  -> getquestion/:p_id
+// GET  -> getuploadedquestion/:p_id
+// POST -> addQuestion, upload.single("q_image")
+// PUT  -> editquestionstatus
+// PUT  -> editquestionstatus2
 
 // Set up storage engine for multer
 const storage = multer.diskStorage({
@@ -30,9 +24,9 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
-
 const upload = multer({ storage: storage });
 
+// GET endpoint
 questionRouter.get("/getquestion/:p_id", (req, res) => {
   const paperId = req.params.p_id;
   const query = "SELECT * FROM Question WHERE p_id = ?";
@@ -62,6 +56,7 @@ questionRouter.get("/getquestion/:p_id", (req, res) => {
   });
 });
 
+// GET endpoint
 questionRouter.get("/getuploadedquestion/:p_id", (req, res) => {
   const paperId = req.params.p_id;
   const query =
@@ -92,20 +87,7 @@ questionRouter.get("/getuploadedquestion/:p_id", (req, res) => {
   });
 });
 
-// questionRouter.get("/getquestion2/:p_id", (req, res) => {
-//   const paperId = req.params.p_id;
-//   const query = "SELECT * FROM Question WHERE p_id = ?";
-
-//   connection.query(query, [paperId], (err, results) => {
-//     if (err) {
-//       console.error("Error executing the query:", err);
-//       res.status(500).json({ error: "Internal Server Error" });
-//       return;
-//     }
-//     res.json(results);
-//   });
-// });
-
+// POST endpoint
 questionRouter.post("/addQuestion", upload.single("q_image"), (req, res) => {
   const { q_text, q_marks, q_difficulty, f_name, t_id, p_id, f_id } = req.body;
   console.log(f_name);
@@ -139,38 +121,7 @@ questionRouter.post("/addQuestion", upload.single("q_image"), (req, res) => {
   );
 });
 
-questionRouter.post("/addQuestion2", (req, res) => {
-  const { q_text, q_image, q_marks, q_difficulty, f_name, t_id, p_id, f_id } =
-    req.body;
-  const q_status = "pending";
-
-  const query =
-    "INSERT INTO Question (q_text, q_image, q_marks, q_difficulty, q_status, f_name, t_id, p_id, f_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-  connection.query(
-    query,
-    [
-      q_text,
-      q_image,
-      q_marks,
-      q_difficulty,
-      q_status,
-      f_name,
-      t_id,
-      p_id,
-      f_id
-    ],
-    (err, results) => {
-      if (err) {
-        console.error("Error executing the query:", err);
-        res.status(500).json({ error: "Internal Server Error" });
-        return;
-      }
-      res.status(200).json({ message: "Question added successfully" });
-    }
-  );
-});
-
+// PUT endpoint
 questionRouter.put("/editquestionstatus", (req, res) => {
   const { paperId, q_ids } = req.body;
   const new_status = "uploaded";
@@ -197,6 +148,7 @@ questionRouter.put("/editquestionstatus", (req, res) => {
   });
 });
 
+// PUT endpoint
 questionRouter.put("/editquestionstatus2", (req, res) => {
   const { acceptedQIds, rejectedQIds } = req.body;
   const newStatusAccepted = "accepted";
@@ -248,5 +200,61 @@ questionRouter.put("/editquestionstatus2", (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
     });
 });
+
+// Set up multer storage engine
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, "uploads/");
+//   },
+//   filename: function (req, file, cb) {
+//     cb(
+//       null,
+//       file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+//     );
+//   }
+// });
+
+// questionRouter.get("/getquestion2/:p_id", (req, res) => {
+//   const paperId = req.params.p_id;
+//   const query = "SELECT * FROM Question WHERE p_id = ?";
+//   connection.query(query, [paperId], (err, results) => {
+//     if (err) {
+//       console.error("Error executing the query:", err);
+//       res.status(500).json({ error: "Internal Server Error" });
+//       return;
+//     }
+//     res.json(results);
+//   });
+// });
+
+// questionRouter.post("/addQuestion2", (req, res) => {
+//     const { q_text, q_image, q_marks, q_difficulty, f_name, t_id, p_id, f_id } =
+//       req.body;
+//     const q_status = "pending";
+//     const query =
+//       "INSERT INTO Question (q_text, q_image, q_marks, q_difficulty, q_status, f_name, t_id, p_id, f_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+//     connection.query(
+//       query,
+//       [
+//         q_text,
+//         q_image,
+//         q_marks,
+//         q_difficulty,
+//         q_status,
+//         f_name,
+//         t_id,
+//         p_id,
+//         f_id
+//       ],
+//       (err, results) => {
+//         if (err) {
+//           console.error("Error executing the query:", err);
+//           res.status(500).json({ error: "Internal Server Error" });
+//           return;
+//         }
+//         res.status(200).json({ message: "Question added successfully" });
+//       }
+//     );
+//   });
 
 module.exports = questionRouter;

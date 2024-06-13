@@ -5,7 +5,15 @@ const facultyRouter = express.Router();
 const connection = require("./database");
 facultyRouter.use(bodyParser.json());
 
-// To Login Faculty Members
+// Routes >>>
+// POST -> login
+// GET  -> getfaculty
+// POST -> addfaculty
+// PUT  -> editfaculty/:f_id
+// PUT  -> enabledisablefaculty/:f_id
+// GET  -> searchfaculty
+
+// POST endpoint
 facultyRouter.post("/login", (req, res) => {
   const { username, password } = req.body;
   const query = "SELECT * FROM Faculty WHERE username = ? AND password = ?";
@@ -23,7 +31,20 @@ facultyRouter.post("/login", (req, res) => {
   });
 });
 
-// To Add New Faculty Member
+// GET endpoint
+facultyRouter.get("/getfaculty", (req, res) => {
+  const query = "SELECT * FROM Faculty";
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+// POST endpoint
 facultyRouter.post("/addfaculty", (req, res) => {
   const { f_name, username, password } = req.body;
   const status = "enabled";
@@ -40,22 +61,9 @@ facultyRouter.post("/addfaculty", (req, res) => {
   });
 });
 
-// To Get All of Faculty Members
-facultyRouter.get("/getfaculty", (req, res) => {
-  const query = "SELECT * FROM Faculty";
-  connection.query(query, (err, results) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.json(results);
-  });
-});
-
-// To Update Faculty Members
-facultyRouter.put("/editfaculty/:id", (req, res) => {
-  const facultyId = req.params.id;
+// PUT endpoint
+facultyRouter.put("/editfaculty/:f_id", (req, res) => {
+  const facultyId = req.params.f_id;
   const { f_name, username, password } = req.body;
   const query =
     "UPDATE Faculty SET f_name = ? , username = ? , password = ? WHERE f_id = ?";
@@ -74,14 +82,14 @@ facultyRouter.put("/editfaculty/:id", (req, res) => {
   });
 });
 
-// To Enable/Disable Faculty Members
-facultyRouter.put("/enabledisablefaculty/:id", (req, res) => {
-  const facultyId = req.params.id;
+// PUT endpoint
+facultyRouter.put("/enabledisablefaculty/:f_id", (req, res) => {
+  const facultyId = req.params.f_id;
   let { status } = req.body;
   if (status !== "enabled" && status !== "disabled") {
     return res.status(400).json({
       error:
-        'Invalid status value. Status must be either "enabled" or "disabled"',
+        'Invalid status value. Status must be either "enabled" or "disabled"'
     });
   }
   if (status === "enabled") {
@@ -103,7 +111,7 @@ facultyRouter.put("/enabledisablefaculty/:id", (req, res) => {
   });
 });
 
-// To Search Faculty Members
+// GET endpoint
 facultyRouter.get("/searchfaculty", (req, res) => {
   const searchQuery = req.query.search;
   const query = "SELECT * FROM Faculty WHERE f_name LIKE ? OR username LIKE ?";

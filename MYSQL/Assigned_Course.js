@@ -3,9 +3,16 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const assignedCoursesRouter = express.Router();
 const connection = require("./database");
+assignedCoursesRouter.use(bodyParser.json());
 
-// const getAssignedCoursesQuery =
-//   "SELECT ac.ac_id, f.f_name AS 'TeacherName', c.c_title AS 'CourseTitle', c.c_code AS 'CourseCode' FROM faculty f JOIN Assigned_Course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE f.f_id = @f_id";
+// Routes >>>
+// GET  -> getAssignedCourses/:f_id
+// GET  -> getUnassignedCourses/:f_id
+// GET  -> getAssignedTo/:c_id
+// GET  -> getPaperStatus/:f_id
+// POST -> assignCourse/:c_id/:f_id
+// DEL  -> deleteAssignedCourse/:ac_id
+// PUT  -> editRole/:c_id/:f_id
 
 // GET endpoint
 assignedCoursesRouter.get("/getAssignedCourses/:f_id", async (req, res) => {
@@ -181,7 +188,7 @@ assignedCoursesRouter.get("/getPaperStatus/:f_id", async (req, res) => {
   }
 });
 
-// To Assign New Course
+// POST endpoint
 assignedCoursesRouter.post("/assignCourse/:c_id/:f_id", (req, res) => {
   const c_id = req.params.c_id;
   if (!/^\d+$/.test(c_id)) {
@@ -218,7 +225,7 @@ assignedCoursesRouter.post("/assignCourse/:c_id/:f_id", (req, res) => {
   });
 });
 
-// To Delete Assigned Course
+// DELETE endpoint
 assignedCoursesRouter.delete("/deleteAssignedCourse/:ac_id", (req, res) => {
   const ac_id = req.params.ac_id;
   if (!/^\d+$/.test(ac_id)) {
@@ -240,7 +247,7 @@ assignedCoursesRouter.delete("/deleteAssignedCourse/:ac_id", (req, res) => {
   });
 });
 
-// EDIT STATUS endpoint
+// PUT endpoint
 assignedCoursesRouter.put("/editRole/:c_id/:f_id", async (req, res) => {
   try {
     const c_id = req.params.c_id;

@@ -5,6 +5,19 @@ const topicRouter = express.Router();
 const connection = require("./database");
 topicRouter.use(bodyParser.json());
 
+// Routes >>>
+// GET  -> gettopic/:c_id
+// GET  -> getsingletopic/:t_id
+// GET  -> searchtopic/:c_id
+// POST -> addtopic
+// PUT  -> edittopic
+// PUT  -> enabledisabletopic/:t_id
+// GET  -> gettopictaught/:f_id
+// GET  -> getcommontopictaught/:c_id
+// POST -> addtopictaught
+// DEL  -> deletetopictaught
+
+// GET endpoint
 topicRouter.get("/gettopic/:c_id", (req, res) => {
   const courseId = req.params.c_id;
   const query = "SELECT * FROM Topic WHERE c_id = ?";
@@ -18,6 +31,7 @@ topicRouter.get("/gettopic/:c_id", (req, res) => {
   });
 });
 
+// GET endpoint
 topicRouter.get("/getsingletopic/:t_id", (req, res) => {
   const topicId = req.params.t_id;
   const query =
@@ -28,7 +42,6 @@ topicRouter.get("/getsingletopic/:t_id", (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
       return;
     }
-
     // Format the clo_ids to an array
     const formattedResults = results.map((row) => ({
       ...row,
@@ -38,6 +51,7 @@ topicRouter.get("/getsingletopic/:t_id", (req, res) => {
   });
 });
 
+// GET endpoint
 topicRouter.get("/searchtopic/:c_id", (req, res) => {
   const courseId = req.params.c_id;
   const search = req.query.search || "";
@@ -53,22 +67,7 @@ topicRouter.get("/searchtopic/:c_id", (req, res) => {
   });
 });
 
-// topicRouter.post("/addtopic", (req, res) => {
-//     const { c_id, t_name } = req.body;
-//     const status = "enabled";
-//     const query =
-//       "INSERT INTO Topic (c_id, t_name, status) VALUES (?, ?, ?)";
-//     const values = [c_id, t_name, status];
-//     connection.query(query, values, (err) => {
-//       if (err) {
-//         console.error("Error executing the query:", err);
-//         res.status(500).json({ error: "Internal Server Error" });
-//         return;
-//       }
-//       res.status(200).json({ message: "Topic added successfully" });
-//     });
-//   });
-
+// POST endpoint
 topicRouter.post("/addtopic", (req, res) => {
   const { c_id, t_name, clo_ids } = req.body; // Expect clo_ids to be an array
   const status = "enabled";
@@ -111,6 +110,7 @@ topicRouter.post("/addtopic", (req, res) => {
   });
 });
 
+// PUT endpoint
 topicRouter.put("/edittopic", (req, res) => {
   const { t_id, t_name, add_clo_ids, remove_clo_ids } = req.body;
 
@@ -160,6 +160,7 @@ topicRouter.put("/edittopic", (req, res) => {
   });
 });
 
+// PUT endpoint
 topicRouter.put("/enabledisabletopic/:t_id", (req, res) => {
   const topicId = req.params.t_id;
   let { status } = req.body;
@@ -187,6 +188,7 @@ topicRouter.put("/enabledisabletopic/:t_id", (req, res) => {
   });
 });
 
+// GET endpoint
 topicRouter.get("/gettopictaught/:f_id", (req, res) => {
   const facultyId = req.params.f_id;
   const query = "SELECT * FROM Topic_Taught WHERE f_id = ?";
@@ -201,6 +203,7 @@ topicRouter.get("/gettopictaught/:f_id", (req, res) => {
   });
 });
 
+// GET endpoint
 topicRouter.get("/getcommontopictaught/:c_id", (req, res) => {
   const courseId = req.params.c_id;
   const query =
@@ -214,6 +217,62 @@ topicRouter.get("/getcommontopictaught/:c_id", (req, res) => {
     res.json(results);
   });
 });
+
+// POST endpoint
+topicRouter.post("/addtopictaught", (req, res) => {
+  const { f_id, t_id, st_id } = req.body;
+  const query = "INSERT INTO Topic_Taught (f_id, t_id, st_id) VALUES (?, ?, ?)";
+  const values = [f_id, t_id, st_id];
+  connection.query(query, values, (err) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.status(200).json({ message: "Course added successfully" });
+  });
+});
+
+// DELETE endpoint
+topicRouter.delete("/deletetopictaught", (req, res) => {
+  const { t_id, f_id } = req.body;
+  if (!/^\d+$/.test(t_id)) {
+    return res.status(400).json({ error: "Invalid topic ID" });
+  }
+  if (!/^\d+$/.test(f_id)) {
+    return res.status(400).json({ error: "Invalid faculty ID" });
+  }
+  const query = "DELETE FROM Topic_Taught WHERE t_id = ? AND f_id = ?";
+  const values = [t_id, f_id];
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Topic_Taught not found" });
+      return;
+    }
+    res.status(200).json({ message: "Topic_Taught deleted successfully" });
+  });
+});
+
+// topicRouter.post("/addtopic", (req, res) => {
+//     const { c_id, t_name } = req.body;
+//     const status = "enabled";
+//     const query =
+//       "INSERT INTO Topic (c_id, t_name, status) VALUES (?, ?, ?)";
+//     const values = [c_id, t_name, status];
+//     connection.query(query, values, (err) => {
+//       if (err) {
+//         console.error("Error executing the query:", err);
+//         res.status(500).json({ error: "Internal Server Error" });
+//         return;
+//       }
+//       res.status(200).json({ message: "Topic added successfully" });
+//     });
+//   });
 
 // topicRouter.get("/getcommontopictaught2/:c_id", (req, res) => {
 //   const courseId = req.params.c_id;
@@ -246,45 +305,5 @@ topicRouter.get("/getcommontopictaught/:c_id", (req, res) => {
 //     res.json(results);
 //   });
 // });
-
-// To Add New Topic Taught
-topicRouter.post("/addtopictaught", (req, res) => {
-  const { f_id, t_id, st_id } = req.body;
-  const query = "INSERT INTO Topic_Taught (f_id, t_id, st_id) VALUES (?, ?, ?)";
-  const values = [f_id, t_id, st_id];
-  connection.query(query, values, (err) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.status(200).json({ message: "Course added successfully" });
-  });
-});
-
-// To Delete Topic Taught
-topicRouter.delete("/deletetopictaught", (req, res) => {
-  const { t_id, f_id } = req.body;
-  if (!/^\d+$/.test(t_id)) {
-    return res.status(400).json({ error: "Invalid topic ID" });
-  }
-  if (!/^\d+$/.test(f_id)) {
-    return res.status(400).json({ error: "Invalid faculty ID" });
-  }
-  const query = "DELETE FROM Topic_Taught WHERE t_id = ? AND f_id = ?";
-  const values = [t_id, f_id];
-  connection.query(query, values, (err, result) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    if (result.affectedRows === 0) {
-      res.status(404).json({ error: "Topic_Taught not found" });
-      return;
-    }
-    res.status(200).json({ message: "Topic_Taught deleted successfully" });
-  });
-});
 
 module.exports = topicRouter;

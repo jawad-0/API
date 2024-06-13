@@ -5,7 +5,11 @@ const difficultyRouter = express.Router();
 const connection = require("./database");
 difficultyRouter.use(bodyParser.json());
 
-// To Get Difficulty Record
+// Routes >>>
+// GET  -> getdifficulty
+// POST -> savedifficulty
+
+// GET endpoint
 difficultyRouter.get("/getdifficulty", (req, res) => {
     const query = "SELECT * FROM Difficulty";
 
@@ -19,7 +23,7 @@ difficultyRouter.get("/getdifficulty", (req, res) => {
     });
   });
 
-// To Save New Difficulty Record
+// POST endpoint
 difficultyRouter.post("/savedifficulty", (req, res) => {
   const { easy, medium, hard } = req.body;
 

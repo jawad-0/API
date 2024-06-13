@@ -5,6 +5,13 @@ const sessionRouter = express.Router();
 const connection = require("./database");
 sessionRouter.use(bodyParser.json());
 
+// Routes >>>
+// GET  -> getSession
+// POST -> addsession
+// PUT  -> editsession/:s_id
+// PUT  -> enabledisablesession/:s_id
+
+// GET endpoint
 sessionRouter.get("/getSession", (req, res) => {
   const query = "SELECT * FROM Session";
 
@@ -18,6 +25,7 @@ sessionRouter.get("/getSession", (req, res) => {
   });
 });
 
+// POST endpoint
 sessionRouter.post("/addsession", (req, res) => {
   const { s_name, year } = req.body;
   const status = "inactive";
@@ -33,6 +41,7 @@ sessionRouter.post("/addsession", (req, res) => {
   });
 });
 
+// PUT endpoint
 sessionRouter.put("/editsession/:s_id", (req, res) => {
   const sessionId = req.params.s_id;
   const { s_name, year } = req.body;
@@ -52,6 +61,7 @@ sessionRouter.put("/editsession/:s_id", (req, res) => {
   });
 });
 
+// PUT endpoint
 sessionRouter.put("/enabledisablesession/:s_id", (req, res) => {
   const sessionId = req.params.s_id;
   if (!sessionId) {

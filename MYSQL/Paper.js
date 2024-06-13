@@ -3,7 +3,52 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const paperRouter = express.Router();
 const connection = require("./database");
+paperRouter.use(bodyParser.json());
 
+// Routes >>>
+// GET  -> getPapers/:c_id
+// GET  -> getpaperheader/:p_id
+// GET  -> getpaperheaderfaculty/:c_id
+// POST -> addPaper
+// PUT  -> editPaper/:p_id
+// PUT  -> editapprovedpaperstatus/:p_id
+// GET  -> getapprovedpapers
+// GET  -> searchapprovedpapers
+// GET  -> getpendingpapers
+// GET  -> searchpendingpapers
+// GET  -> getuploadedpapers
+// GET  -> searchuploadedpapers
+// GET  -> getprintedpapers
+// GET  -> searchprintedpapers
+
+// GET endpoint
+paperRouter.get("/getPapers/:c_id", (req, res) => {
+  const { c_id } = req.params;
+  const sessionQuery = "SELECT s_id FROM Session WHERE flag = 'active'";
+  connection.query(sessionQuery, (err, sessionResult) => {
+    if (err) {
+      console.error("Error executing the session query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    if (sessionResult.length === 0) {
+      res.status(404).json({ error: "No active session found" });
+      return;
+    }
+    const { s_id } = sessionResult[0];
+    const papersQuery = "SELECT * FROM Paper WHERE s_id = ? AND c_id = ?";
+    connection.query(papersQuery, [s_id, c_id], (err, result) => {
+      if (err) {
+        console.error("Error executing the papers query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
+      }
+      res.status(200).json(result);
+    });
+  });
+});
+
+// GET endpoint
 paperRouter.get("/getpaperheader/:p_id", (req, res) => {
   const paperId = req.params.p_id;
   if (!/^\d+$/.test(paperId)) {
@@ -21,6 +66,7 @@ paperRouter.get("/getpaperheader/:p_id", (req, res) => {
   });
 });
 
+// GET endpoint
 paperRouter.get("/getpaperheaderfaculty/:c_id", (req, res) => {
   const courseId = req.params.c_id;
   if (!/^\d+$/.test(courseId)) {
@@ -52,33 +98,7 @@ paperRouter.get("/getpaperheaderfaculty/:c_id", (req, res) => {
   });
 });
 
-paperRouter.get("/getPapers/:c_id", (req, res) => {
-  const { c_id } = req.params;
-  const sessionQuery = "SELECT s_id FROM Session WHERE flag = 'active'";
-  connection.query(sessionQuery, (err, sessionResult) => {
-    if (err) {
-      console.error("Error executing the session query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    if (sessionResult.length === 0) {
-      res.status(404).json({ error: "No active session found" });
-      return;
-    }
-    const { s_id } = sessionResult[0];
-    const papersQuery = "SELECT * FROM Paper WHERE s_id = ? AND c_id = ?";
-    connection.query(papersQuery, [s_id, c_id], (err, result) => {
-      if (err) {
-        console.error("Error executing the papers query:", err);
-        res.status(500).json({ error: "Internal Server Error" });
-        return;
-      }
-      res.status(200).json(result);
-    });
-  });
-});
-
-// To Add New Paper
+// POST endpoint
 paperRouter.post("/addPaper", (req, res) => {
   const { degree, exam_date, duration, term, c_id } = req.body;
   const status = "pending";
@@ -143,9 +163,9 @@ paperRouter.post("/addPaper", (req, res) => {
   });
 });
 
-// To Edit Paper
-paperRouter.put("/editPaper/:id", (req, res) => {
-  const paperID = req.params.id;
+// PUT endpoint
+paperRouter.put("/editPaper/:p_id", (req, res) => {
+  const paperID = req.params.p_id;
   const { degree, exam_date, duration } = req.body;
   const checkPaperQuery = "SELECT * FROM Paper WHERE p_id = ?";
   connection.query(checkPaperQuery, [paperID], (err, existingPaper) => {
@@ -172,93 +192,7 @@ paperRouter.put("/editPaper/:id", (req, res) => {
   });
 });
 
-paperRouter.get("/getapprovedpapers", (req, res) => {
-  const query =
-    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE p.status = ?";
-  const status = "approved";
-  connection.query(query, [status], (err, result) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.status(200).json(result);
-  });
-});
-
-paperRouter.get("/searchapprovedpapers", (req, res) => {
-  const searchQuery = req.query.search;
-  const query =
-    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE c.c_title LIKE ? AND p.status = 'approved'";
-  const searchValue = `%${searchQuery}%`;
-  connection.query(query, [searchValue], (err, result) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.status(200).json(result);
-  });
-});
-
-paperRouter.get("/getpendingpapers", (req, res) => {
-  const query =
-    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE p.status = ?";
-  const status = "pending";
-  connection.query(query, [status], (err, result) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.status(200).json(result);
-  });
-});
-
-paperRouter.get("/searchpendingpapers", (req, res) => {
-  const searchQuery = req.query.search;
-  const query =
-    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE c.c_title LIKE ? AND p.status = 'pending'";
-  const searchValue = `%${searchQuery}%`;
-  connection.query(query, [searchValue], (err, result) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.status(200).json(result);
-  });
-});
-
-paperRouter.get("/getuploadedpapers", (req, res) => {
-  const query =
-    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE p.status = ?";
-  const status = "uploaded";
-  connection.query(query, [status], (err, result) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.status(200).json(result);
-  });
-});
-
-paperRouter.get("/searchuploadedpapers", (req, res) => {
-  const searchQuery = req.query.search;
-  const query =
-    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE c.c_title LIKE ? AND p.status = 'uploaded'";
-  const searchValue = `%${searchQuery}%`;
-  connection.query(query, [searchValue], (err, result) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.status(200).json(result);
-  });
-});
-
+// PUT endpoint
 paperRouter.put("/editapprovedpaperstatus/:p_id", (req, res) => {
   const paperId = req.params.p_id;
 
@@ -279,6 +213,100 @@ paperRouter.put("/editapprovedpaperstatus/:p_id", (req, res) => {
   });
 });
 
+// GET endpoint
+paperRouter.get("/getapprovedpapers", (req, res) => {
+  const query =
+    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE p.status = ?";
+  const status = "approved";
+  connection.query(query, [status], (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.status(200).json(result);
+  });
+});
+
+// GET endpoint
+paperRouter.get("/searchapprovedpapers", (req, res) => {
+  const searchQuery = req.query.search;
+  const query =
+    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE c.c_title LIKE ? AND p.status = 'approved'";
+  const searchValue = `%${searchQuery}%`;
+  connection.query(query, [searchValue], (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.status(200).json(result);
+  });
+});
+
+// GET endpoint
+paperRouter.get("/getpendingpapers", (req, res) => {
+  const query =
+    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE p.status = ?";
+  const status = "pending";
+  connection.query(query, [status], (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.status(200).json(result);
+  });
+});
+
+// GET endpoint
+paperRouter.get("/searchpendingpapers", (req, res) => {
+  const searchQuery = req.query.search;
+  const query =
+    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE c.c_title LIKE ? AND p.status = 'pending'";
+  const searchValue = `%${searchQuery}%`;
+  connection.query(query, [searchValue], (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.status(200).json(result);
+  });
+});
+
+// GET endpoint
+paperRouter.get("/getuploadedpapers", (req, res) => {
+  const query =
+    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE p.status = ?";
+  const status = "uploaded";
+  connection.query(query, [status], (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.status(200).json(result);
+  });
+});
+
+// GET endpoint
+paperRouter.get("/searchuploadedpapers", (req, res) => {
+  const searchQuery = req.query.search;
+  const query =
+    "SELECT p.*, c.c_title, c.c_code FROM Paper p INNER JOIN Course c ON p.c_id = c.c_id WHERE c.c_title LIKE ? AND p.status = 'uploaded'";
+  const searchValue = `%${searchQuery}%`;
+  connection.query(query, [searchValue], (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.status(200).json(result);
+  });
+});
+
+// GET endpoint
 paperRouter.get("/getprintedpapers", (req, res) => {
   const query =
     "SELECT Paper.*, Course.* FROM Paper INNER JOIN Course ON Paper.c_id = Course.c_id WHERE Paper.status = ?";
@@ -293,6 +321,7 @@ paperRouter.get("/getprintedpapers", (req, res) => {
   });
 });
 
+// GET endpoint
 paperRouter.get("/searchprintedpapers", (req, res) => {
   const searchQuery = req.query.search;
   const query =

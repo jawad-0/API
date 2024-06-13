@@ -5,22 +5,9 @@ const feedbackRouter = express.Router();
 const connection = require("./database");
 feedbackRouter.use(bodyParser.json());
 
-// To Add New Course
-feedbackRouter.post("/addcourse", (req, res) => {
-  const { c_code, c_title, cr_hours } = req.body;
-  const status = "enabled";
-  const query =
-    "INSERT INTO Course (c_code, c_title, cr_hours, status) VALUES (?, ?, ?, ?)";
-  const values = [c_code, c_title, cr_hours, status];
-  connection.query(query, values, (err) => {
-    if (err) {
-      console.error("Error executing the query:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-      return;
-    }
-    res.status(200).json({ message: "Course added successfully" });
-  });
-});
+// Routes >>>
+// GET  -> getFeedback/:f_id
+// POST -> addfeedback
 
 // GET endpoint
 feedbackRouter.get("/getFeedback/:f_id", (req, res) => {
@@ -51,7 +38,7 @@ feedbackRouter.get("/getFeedback/:f_id", (req, res) => {
   }
 });
 
-// To Add New Course
+// POST endpoint
 feedbackRouter.post("/addfeedback", (req, res) => {
   const { fb_text, p_id, c_id, q_id } = req.body;
   if (p_id === null || c_id === null) {
