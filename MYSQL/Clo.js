@@ -40,11 +40,42 @@ cloRouter.get("/getCLO/:c_id", async (req, res) => {
   }
 });
 
+// GET endpoint
+cloRouter.get("/getApprovedCLO/:c_id", async (req, res) => {
+  try {
+    const userId = req.params.c_id;
+    if (!/^\d+$/.test(userId)) {
+      return res.status(400).json({ error: "Invalid Course ID" });
+    }
+    const getQuery = "SELECT * FROM CLO WHERE c_id = ? AND status = 'approved'";
+
+    connection.query(getQuery, [userId], (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Query error" });
+      }
+      if (result.length === 0) {
+        return res
+          .status(404)
+          .json({ error: "Data not found for the given ID" });
+      }
+      res.json(result);
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Get Request Error" });
+  }
+});
+
 // EDIT endpoint
 cloRouter.put("/approvedisapproveCLO/:clo_id", (req, res) => {
   const CLOId = req.params.clo_id;
   let { status } = req.body;
-  if (status !== "approved" && status !== "disapproved" && status !== "pending") {
+  if (
+    status !== "approved" &&
+    status !== "disapproved" &&
+    status !== "pending"
+  ) {
     return res.status(400).json({
       error:
         'Invalid status value. Status must be either "approved", "disapproved" or "pending"'

@@ -26,16 +26,29 @@ paperRouter.get("/getpaperheaderfaculty/:c_id", (req, res) => {
   if (!/^\d+$/.test(courseId)) {
     return res.status(400).json({ error: "Invalid paper ID" });
   }
-  // const query = "SELECT f_name FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id JOIN paper p ON p.c_id = c.c_id WHERE p.p_id = ?";
-  const query =
-    "SELECT f.f_id, f.f_name FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE c.c_id = ?";
-  connection.query(query, [courseId], (err, result) => {
+  const sessionQuery = "SELECT s_id FROM Session WHERE flag = 'active'";
+  connection.query(sessionQuery, (err, sessionResult) => {
     if (err) {
-      console.error("Error executing the query:", err);
+      console.error("Error executing the session query:", err);
       res.status(500).json({ error: "Internal Server Error" });
       return;
     }
-    res.status(200).json(result);
+    if (sessionResult.length === 0) {
+      res.status(404).json({ error: "No active session found" });
+      return;
+    }
+    const { s_id } = sessionResult[0];
+    // const query = "SELECT f_name FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id JOIN paper p ON p.c_id = c.c_id WHERE p.p_id = ?";
+    const query =
+      "SELECT f.f_id, f.f_name FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE c.c_id = ? AND ac.s_id = ?";
+    connection.query(query, [courseId, s_id], (err, result) => {
+      if (err) {
+        console.error("Error executing the query:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
+      }
+      res.status(200).json(result);
+    });
   });
 });
 
