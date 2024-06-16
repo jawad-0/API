@@ -23,9 +23,11 @@ CREATE TABLE Session (
     flag BIT(1) NOT NULL
 );
 CREATE TABLE Difficulty (
-    d_id INT PRIMARY KEY,
-    difficulty VARCHAR(20) NOT NULL,
-    number INT NOT NULL
+    d_id INT AUTO_INCREMENT PRIMARY KEY,
+    number_of_questions INT NOT NULL,
+    easy INT,
+    medium INT,
+    hard INT
 );
 CREATE TABLE Faculty (
     f_id INT AUTO_INCREMENT PRIMARY KEY,
