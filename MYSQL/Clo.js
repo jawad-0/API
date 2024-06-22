@@ -11,6 +11,12 @@ cloRouter.use(bodyParser.json());
 // POST -> addCLO
 // PUT  -> approvedisapproveCLO/:clo_id
 // PUT  -> editCLO/:clo_id
+// GET  -> getValidMidCLOS/:c_id
+// GET  -> getValidFinalCLOS/:c_id
+// GET  -> getInvalidMidCLOS/:c_id
+// GET  -> getInvalidFinalCLOS/:c_id
+// GET  -> getQuestionValidMidCLOS/:q_id
+// GET  -> getQuestionValidFinalCLOS/:q_id
 
 // GET endpoint
 cloRouter.get("/getCLO/:c_id", async (req, res) => {
@@ -181,6 +187,96 @@ cloRouter.put("/editCLO/:clo_id", async (req, res) => {
     console.error("Error updating CLO:", error);
     res.status(500).json({ error: "Edit Request Error" });
   }
+});
+
+// GET endpoint
+cloRouter.get("/getValidMidCLOS/:c_id", (req, res) => {
+  const courseId = req.params.c_id;
+  const getQuery =
+    "SELECT DISTINCT CLO.clo_id, clo_number, clo_text, weightage3 AS weightage FROM Paper JOIN CLO ON Paper.c_id = CLO.c_id JOIN Grid_View_Weightage ON CLO.clo_id = Grid_View_Weightage.clo_id WHERE Paper.c_id = ? AND Paper.term = 'Mid' AND weightage3 > 0";
+  connection.query(getQuery, [courseId], (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+// GET endpoint
+cloRouter.get("/getValidFinalCLOS/:c_id", (req, res) => {
+  const courseId = req.params.c_id;
+  const getQuery =
+    "SELECT DISTINCT CLO.clo_id, clo_number, clo_text, weightage3 AS weightage FROM Paper JOIN CLO ON Paper.c_id = CLO.c_id JOIN Grid_View_Weightage ON CLO.clo_id = Grid_View_Weightage.clo_id WHERE Paper.c_id = ? AND Paper.term = 'Final' AND weightage4 > 0";
+  connection.query(getQuery, [courseId], (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+// GET endpoint
+cloRouter.get("/getInvalidMidCLOS/:c_id", (req, res) => {
+  const courseId = req.params.c_id;
+  const getQuery =
+    "SELECT DISTINCT CLO.clo_id, clo_number, clo_text, weightage3 AS weightage FROM Paper JOIN CLO ON Paper.c_id = CLO.c_id LEFT JOIN Grid_View_Weightage ON CLO.clo_id = Grid_View_Weightage.clo_id WHERE Paper.c_id = ? AND Paper.term = 'Mid' AND (weightage3 = 0 OR weightage3 IS NULL)";
+  connection.query(getQuery, [courseId], (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+// GET endpoint
+cloRouter.get("/getInvalidFinalCLOS/:c_id", (req, res) => {
+  const courseId = req.params.c_id;
+  const getQuery =
+    "SELECT DISTINCT CLO.clo_id, clo_number, clo_text, weightage4 AS weightage FROM Paper JOIN CLO ON Paper.c_id = CLO.c_id LEFT JOIN Grid_View_Weightage ON CLO.clo_id = Grid_View_Weightage.clo_id WHERE Paper.c_id = ? AND Paper.term = 'Final' AND (weightage4 = 0 OR weightage3 IS NULL)";
+  connection.query(getQuery, [courseId], (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+// GET endpoint
+cloRouter.get("/getQuestionValidMidCLOS/:q_id", (req, res) => {
+  const questionId = req.params.q_id;
+  const getQuery =
+    "SELECT DISTINCT CLO.* FROM CLO JOIN Topic_Map_CLO ON CLO.clo_id = Topic_Map_CLO.clo_id JOIN question_topic ON Topic_Map_CLO.t_id = question_topic.t_id WHERE question_topic.q_id = ?";
+  connection.query(getQuery, [questionId], (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+// GET endpoint
+cloRouter.get("/getQuestionValidFinalCLOS/:q_id", (req, res) => {
+  const questionId = req.params.q_id;
+  const getQuery =
+    "SELECT DISTINCT CLO.* FROM CLO JOIN Topic_Map_CLO ON CLO.clo_id = Topic_Map_CLO.clo_id JOIN question_topic ON Topic_Map_CLO.t_id = question_topic.t_id WHERE question_topic.q_id = ?";
+  connection.query(getQuery, [questionId], (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results);
+  });
 });
 
 // const getQuery = "SELECT * FROM CLO WHERE c_id = @c_id";

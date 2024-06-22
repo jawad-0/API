@@ -12,6 +12,8 @@ paperRouter.use(bodyParser.json());
 // GET  -> getNumberOfQuestions/:p_id
 // POST -> addPaper
 // PUT  -> editPaper/:p_id
+// PUT  -> editpendingpaperstatus/:p_id
+// PUT  -> edituploadedpaperstatus/:p_id
 // PUT  -> editapprovedpaperstatus/:p_id
 // GET  -> getapprovedpapers
 // GET  -> searchapprovedpapers
@@ -21,6 +23,7 @@ paperRouter.use(bodyParser.json());
 // GET  -> searchuploadedpapers
 // GET  -> getprintedpapers
 // GET  -> searchprintedpapers
+// GET -> searchpapershistory
 
 // GET endpoint
 paperRouter.get("/getPapers/:c_id", (req, res) => {
@@ -208,6 +211,48 @@ paperRouter.put("/editPaper/:p_id", (req, res) => {
       }
       res.status(200).json({ message: "Paper updated successfully" });
     });
+  });
+});
+
+// PUT endpoint
+paperRouter.put("/editpendingpaperstatus/:p_id", (req, res) => {
+  const paperId = req.params.p_id;
+
+  const updateQuery = "UPDATE Paper SET status = ? WHERE p_id = ?";
+  const status = "uploaded";
+  //   const status = req.body.status === "Print" ? "Printed" : req.body.status;
+  connection.query(updateQuery, [status, paperId], (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Paper not found" });
+      return;
+    }
+    res.status(200).json({ message: "Paper status updated successfully" });
+  });
+});
+
+// PUT endpoint
+paperRouter.put("/edituploadedpaperstatus/:p_id", (req, res) => {
+  const paperId = req.params.p_id;
+
+  const updateQuery = "UPDATE Paper SET status = ? WHERE p_id = ?";
+  const status = "approved";
+  //   const status = req.body.status === "Print" ? "Printed" : req.body.status;
+  connection.query(updateQuery, [status, paperId], (err, result) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Paper not found" });
+      return;
+    }
+    res.status(200).json({ message: "Paper status updated successfully" });
   });
 });
 
@@ -465,6 +510,41 @@ paperRouter.get("/searchprintedpapers", (req, res) => {
       }
       res.status(200).json(result);
     });
+  });
+});
+
+// GET Endpoint
+paperRouter.get("/searchpapershistory", (req, res) => {
+  const year = req.query.year;
+  const session = req.query.session;
+  const term = req.query.term;
+  console.log(`Received query parameters - Year: ${year}, Session: ${session}, Term: ${term}`);
+
+  let query = `SELECT p.*, c.c_id, c.c_code, c.c_title FROM Paper p JOIN Course c ON p.c_id = c.c_id WHERE p.status = 'printed'`;
+  let params = [];
+  if (year) {
+    query += ` AND year = ?`;
+    params.push(year);
+  }
+  if (session) {
+    query += ` AND session = ?`;
+    params.push(session);
+  }
+  if (term) {
+    query += ` AND term = ?`;
+    params.push(term);
+  }
+  connection.query(query, params, (error, results, fields) => {
+    if (error) {
+      console.error("Error executing query: " + error);
+      res.status(500).send("Error executing query.");
+      return;
+    }
+    if (results.length === 0) {
+      res.status(404).send("No papers found matching the criteria.");
+      return;
+    }
+    res.json(results);
   });
 });
 

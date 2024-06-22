@@ -125,7 +125,6 @@ CREATE TABLE Question (
     q_marks INT NOT NULL,
     q_difficulty VARCHAR(10) NOT NULL,
     q_status VARCHAR(20) NOT NULL,
-    t_id INT NOT NULL,
     p_id INT NOT NULL,
     f_id INT NOT NULL,
     FOREIGN KEY (t_id) REFERENCES Topic(t_id),
@@ -142,3 +141,7 @@ CREATE TABLE Feedback (
     FOREIGN KEY (c_id) REFERENCES Course(c_id),
     FOREIGN KEY (q_id) REFERENCES Question(q_id)
 );
+CREATE TABLE Question_Topic (
+	q_id INT NOT NULL,
+	t_id INT NOT NULL
+)
