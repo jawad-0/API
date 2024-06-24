@@ -9,6 +9,7 @@ assignedCoursesRouter.use(bodyParser.json());
 // GET  -> getAssignedCourses/:f_id
 // GET  -> getUnassignedCourses/:f_id
 // GET  -> getAssignedTo/:c_id
+// GET  -> getHistoryAssignedTo/:c_id/:year/:s_name
 // GET  -> getPaperStatus/:f_id
 // POST -> assignCourse/:c_id/:f_id
 // DEL  -> deleteAssignedCourse/:ac_id
@@ -146,6 +147,52 @@ assignedCoursesRouter.get("/getAssignedTo/:c_id", async (req, res) => {
     res.status(500).json({ error: "Get Request Error" });
   }
 });
+
+// GET endpoint
+assignedCoursesRouter.get(
+  "/getHistoryAssignedTo/:c_id/:year/:s_name",
+  async (req, res) => {
+    try {
+      const { c_id, year, s_name } = req.params;
+      if (!/^\d+$/.test(c_id)) {
+        return res.status(400).json({ error: "Invalid course ID" });
+      }
+      const sessionQuery =
+        "SELECT s_id FROM Session WHERE year = ? AND s_name = ?";
+      connection.query(sessionQuery, [year, s_name], (err, sessionResult) => {
+        if (err) {
+          console.error("Error executing the session query:", err);
+          return res.status(500).json({ error: "Internal Server Error" });
+        }
+        if (sessionResult.length === 0) {
+          return res
+            .status(404)
+            .json({ error: "No session found for the given year and name" });
+        }
+
+        const { s_id } = sessionResult[0];
+        const getAssignedToQuery =
+          "SELECT ac.*, f.f_name, c.c_title, c.c_code FROM faculty f JOIN assigned_course ac ON f.f_id = ac.f_id JOIN course c ON ac.c_id = c.c_id WHERE c.c_id = ? AND ac.s_id = ?";
+
+        connection.query(getAssignedToQuery, [c_id, s_id], (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Query error" });
+          }
+          if (result.length === 0) {
+            return res
+              .status(404)
+              .json({ error: "Data not found for the given ID" });
+          }
+          res.json(result);
+        });
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Get Request Error" });
+    }
+  }
+);
 
 // GET endpoint
 assignedCoursesRouter.get("/getPaperStatus/:f_id", async (req, res) => {

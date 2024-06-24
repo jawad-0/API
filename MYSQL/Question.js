@@ -66,8 +66,11 @@ const upload = multer({ storage: storage });
 // GET endpoint
 questionRouter.get("/getquestion/:p_id", (req, res) => {
   const paperId = req.params.p_id;
-  const query =
-    "SELECT q.*, GROUP_CONCAT(DISTINCT clo.clo_number) AS mapped_clos FROM Question q LEFT JOIN Question_Topic qt ON q.q_id = qt.q_id LEFT JOIN Topic_Map_CLO tc ON qt.t_id = tc.t_id LEFT JOIN CLO clo ON tc.clo_id = clo.clo_id WHERE q.p_id = ? GROUP BY q.q_id";
+  const query = `SELECT q.*, GROUP_CONCAT(DISTINCT clo.clo_number)
+    AS mapped_clos FROM Question q LEFT JOIN Question_Topic qt
+    ON q.q_id = qt.q_id LEFT JOIN Topic_Map_CLO tc ON
+    qt.t_id = tc.t_id LEFT JOIN CLO clo ON tc.clo_id = clo.clo_id
+    WHERE q.p_id = ? GROUP BY q.q_id`;
   connection.query(query, [paperId], (err, results) => {
     if (err) {
       console.error("Error executing the query:", err);

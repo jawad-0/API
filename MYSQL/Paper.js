@@ -23,7 +23,7 @@ paperRouter.use(bodyParser.json());
 // GET  -> searchuploadedpapers
 // GET  -> getprintedpapers
 // GET  -> searchprintedpapers
-// GET -> searchpapershistory
+// GET  -> searchpapershistory
 
 // GET endpoint
 paperRouter.get("/getPapers/:c_id", (req, res) => {
