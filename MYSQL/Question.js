@@ -231,6 +231,7 @@ questionRouter.post("/addQuestion", upload.single("q_image"), (req, res) => {
   console.log(f_name);
   const q_status = "pending";
   const q_image = req.file ? req.file.path : null;
+  console.log(q_image);
   const query =
     "INSERT INTO Question (q_text, q_image, q_marks, q_difficulty, q_status, f_name, p_id, f_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
   connection.query(
@@ -299,9 +300,15 @@ questionRouter.put(
               return;
             }
             // Update question details
-            const updateQuery =
-              "UPDATE Question SET q_text = ?, q_marks = ?, q_difficulty = ?, q_image = ? WHERE q_id = ?";
-            const updateValues = [q_text, q_marks, q_difficulty, q_image, q_id];
+            let updateQuery =
+              "UPDATE Question SET q_text = ?, q_marks = ?, q_difficulty = ?";
+            const updateValues = [q_text, q_marks, q_difficulty];
+            if (q_image) {
+              updateQuery += ", q_image = ?";
+              updateValues.push(q_image);
+            }
+            updateQuery += " WHERE q_id = ?";
+            updateValues.push(q_id);
             connection.query(
               updateQuery,
               updateValues,

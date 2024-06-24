@@ -66,7 +66,7 @@ CREATE TABLE Assigned_Course (
     s_id INT NOT NULL,
     FOREIGN KEY (c_id) REFERENCES Course(c_id),
     FOREIGN KEY (f_id) REFERENCES Faculty(f_id),
-    FOREIGN KEY (s_id) REFERENCES session(s_id)
+    FOREIGN KEY (s_id) REFERENCES Session(s_id)
 );
 CREATE TABLE CLO (
     clo_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -107,9 +107,11 @@ CREATE TABLE Topic_Taught (
     f_id INT,
     t_id INT,
     st_id INT,
+    s_id INT NOT NULL,
     FOREIGN KEY (f_id) REFERENCES Faculty(f_id),
     FOREIGN KEY (t_id) REFERENCES Topic(t_id),
-    FOREIGN KEY (st_id) REFERENCES Subtopic(st_id)
+    FOREIGN KEY (st_id) REFERENCES Subtopic(st_id),
+    FOREIGN KEY (s_id) REFERENCES Session(s_id)
 );
 CREATE TABLE Topic_Map_CLO (
     ct_id INT AUTO_INCREMENT PRIMARY KEY,
