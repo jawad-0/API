@@ -10,6 +10,7 @@ questionRouter.use(bodyParser.json());
 
 // Routes >>>
 // GET  -> getquestion/:p_id
+// GET  -> getEncryptedquestion/:p_id
 // GET  -> getsinglequestion/:q_id
 // GET  -> getuploadedquestion/:p_id
 // GET  -> getadditionalquestion/:p_id
@@ -17,6 +18,7 @@ questionRouter.use(bodyParser.json());
 // GET  -> getValidPaperCLOS/:p_id
 // GET  -> getQuestionCLOS/:q_id
 // POST -> addQuestion, upload.single("q_image")
+// POST -> addEncryptedQuestion, upload.single("q_image")
 // PUT  -> editQuestion, upload.single("q_image")
 // PUT  -> editpendingquestionstatus
 // PUT  -> edituploadedquestionstatus
@@ -95,6 +97,52 @@ questionRouter.get("/getquestion/:p_id", (req, res) => {
   });
 });
 
+// GET endpoint to fetch questions
+questionRouter.get("/getEncryptedquestion/:p_id", (req, res) => {
+  const paperId = req.params.p_id;
+  const query = `SELECT q.*, GROUP_CONCAT(DISTINCT clo.clo_number) AS mapped_clos
+                   FROM Question q
+                   LEFT JOIN Question_Topic qt ON q.q_id = qt.q_id
+                   LEFT JOIN Topic_Map_CLO tc ON qt.t_id = tc.t_id
+                   LEFT JOIN CLO clo ON tc.clo_id = clo.clo_id
+                   WHERE q.p_id = ?
+                   GROUP BY q.q_id`;
+  connection.query(query, [paperId], (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+
+    // Decode Base64-encoded q_text field
+    results.forEach((question) => {
+      if (question.q_text) {
+        question.q_text = decodeBase64(question.q_text);
+      }
+
+      // Read image files from the uploads directory for records with images
+      if (question.q_image) {
+        const imagePath = `${question.q_image}`;
+        try {
+          const imageData = fs.readFileSync(imagePath);
+          question.imageData = imageData.toString("base64");
+        } catch (error) {
+          console.error("Error reading image file:", error);
+          res.status(500).json({ error: "Internal Server Error" });
+          return;
+        }
+      }
+    });
+
+    res.json(results);
+  });
+});
+
+// Helper function to decode Base64 text
+function decodeBase64(encodedText) {
+  return Buffer.from(encodedText, "base64").toString("utf8");
+}
+
 // GET endpoint
 questionRouter.get("/getsinglequestion/:q_id", (req, res) => {
   const questionId = req.params.q_id;
@@ -150,19 +198,85 @@ questionRouter.get("/getuploadedquestion/:p_id", (req, res) => {
 });
 
 // GET endpoint
+// questionRouter.get("/getadditionalquestion/:p_id", (req, res) => {
+//   const paperId = req.params.p_id;
+//   const query = `SELECT q.*, GROUP_CONCAT(DISTINCT clo.clo_number) AS mapped_clos
+//     FROM Question q LEFT JOIN Question_Topic qt ON q.q_id = qt.q_id
+//     LEFT JOIN Topic_Map_CLO tc ON qt.t_id = tc.t_id LEFT JOIN CLO clo
+//     ON tc.clo_id = clo.clo_id WHERE q.p_id = ? AND q.q_status = 'pending' GROUP BY q.q_id`;
+
+//   connection.query(query, [paperId], (err, results) => {
+//     if (err) {
+//       console.error("Error executing the query:", err);
+//       res.status(500).json({ error: "Internal Server Error" });
+//       return;
+//     }
+//     // Read image files from the uploads directory for records with images
+//     results.forEach((question) => {
+//       if (question.q_image) {
+//         const imagePath = `${question.q_image}`;
+//         try {
+//           const imageData = fs.readFileSync(imagePath);
+//           question.imageData = imageData.toString("base64");
+//         } catch (error) {
+//           console.error("Error reading image file:", error);
+//           res.status(500).json({ error: "Internal Server Error" });
+//           return;
+//         }
+//       }
+//     });
+
+//     res.json(results);
+//   });
+// });
+
+// GET endpoint
 questionRouter.get("/getadditionalquestion/:p_id", (req, res) => {
   const paperId = req.params.p_id;
-  const query =
-    "SELECT q.*, GROUP_CONCAT(DISTINCT clo.clo_number) AS mapped_clos FROM Question q LEFT JOIN Question_Topic qt ON q.q_id = qt.q_id LEFT JOIN Topic_Map_CLO tc ON qt.t_id = tc.t_id LEFT JOIN CLO clo ON tc.clo_id = clo.clo_id WHERE q.p_id = ? AND q.q_status = 'pending' GROUP BY q.q_id";
+  const cloFilters = req.query.clos ? req.query.clos.split(",") : [];
+  const difficulty = req.query.difficulty; // Get difficulty from query parameters
 
-  connection.query(query, [paperId], (err, results) => {
+  // Example CLO count based on filters
+  const cloCount = cloFilters.length;
+
+  // Dynamic SQL query using placeholders
+  let query = `
+      SELECT q.*, GROUP_CONCAT(DISTINCT clo.clo_number) AS mapped_clos
+      FROM Question q
+      LEFT JOIN Question_Topic qt ON q.q_id = qt.q_id
+      LEFT JOIN Topic_Map_CLO tc ON qt.t_id = tc.t_id
+      LEFT JOIN CLO clo ON tc.clo_id = clo.clo_id
+      WHERE q.p_id = ? AND q.q_status = 'pending'
+        AND FIND_IN_SET(clo.clo_number, ?)
+    `;
+
+  // Parameters for the SQL query
+  const params = [paperId, cloFilters.join(",")];
+
+  // If difficulty is provided, add it to the query and parameters
+  if (difficulty) {
+    query += "AND q.q_difficulty = ? ";
+    params.push(difficulty);
+  }
+
+  query += `
+      GROUP BY q.q_id
+      HAVING COUNT(DISTINCT clo.clo_number) = ?
+    `;
+
+  // Add cloCount to params
+  params.push(cloCount);
+
+  connection.query(query, params, (err, results) => {
     if (err) {
       console.error("Error executing the query:", err);
       res.status(500).json({ error: "Internal Server Error" });
       return;
     }
-    // Read image files from the uploads directory for records with images
+
+    // Process each question result
     results.forEach((question) => {
+      // Read and attach image data if q_image exists
       if (question.q_image) {
         const imagePath = `${question.q_image}`;
         try {
@@ -176,6 +290,7 @@ questionRouter.get("/getadditionalquestion/:p_id", (req, res) => {
       }
     });
 
+    // Send the modified results back as JSON
     res.json(results);
   });
 });
@@ -232,31 +347,153 @@ questionRouter.post("/addQuestion", upload.single("q_image"), (req, res) => {
   const q_status = "pending";
   const q_image = req.file ? req.file.path : null;
   console.log(q_image);
-  const query =
-    "INSERT INTO Question (q_text, q_image, q_marks, q_difficulty, q_status, f_name, p_id, f_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+  // First, check for similar questions in the same course
+  const similarityCheckQuery = `
+      SELECT q.q_id, q.q_text
+      FROM Question q
+      JOIN Paper p ON q.p_id = p.p_id
+      WHERE q.q_text LIKE ? AND p.c_id = (SELECT c_id FROM Paper WHERE p_id = ?)
+      LIMIT 1
+    `;
   connection.query(
-    query,
-    [q_text, q_image, q_marks, q_difficulty, q_status, f_name, p_id, f_id],
-    (err, results) => {
-      if (err) {
-        console.error("Error executing the query:", err);
+    similarityCheckQuery,
+    [`%${q_text}%`, p_id],
+    (checkErr, checkResults) => {
+      if (checkErr) {
+        console.error("Error executing the similarity check query:", checkErr);
         res.status(500).json({ error: "Internal Server Error" });
         return;
       }
-      const q_id = results.insertId;
-      const topicQuery = "INSERT INTO question_topic (q_id, t_id) VALUES ?";
-      const topicValues = t_ids.map((t_id) => [q_id, t_id]);
-      connection.query(topicQuery, [topicValues], (topicErr, topicResults) => {
-        if (topicErr) {
-          console.error("Error executing the topic query:", topicErr);
-          res.status(500).json({ error: "Internal Server Error" });
-          return;
+      if (checkResults.length > 0) {
+        // Similar question found, return conflict status
+        res.status(409).json({ message: "Similar question already exists" });
+        return;
+      }
+      // No similar question found, proceed with insertion
+      const insertQuery =
+        "INSERT INTO Question (q_text, q_image, q_marks, q_difficulty, q_status, f_name, p_id, f_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+      connection.query(
+        insertQuery,
+        [q_text, q_image, q_marks, q_difficulty, q_status, f_name, p_id, f_id],
+        (insertErr, insertResults) => {
+          if (insertErr) {
+            console.error("Error executing the insertion query:", insertErr);
+            res.status(500).json({ error: "Internal Server Error" });
+            return;
+          }
+
+          const q_id = insertResults.insertId;
+          const topicQuery = "INSERT INTO question_topic (q_id, t_id) VALUES ?";
+          const topicValues = t_ids.map((t_id) => [q_id, t_id]);
+          connection.query(
+            topicQuery,
+            [topicValues],
+            (topicErr, topicResults) => {
+              if (topicErr) {
+                console.error("Error executing the topic query:", topicErr);
+                res.status(500).json({ error: "Internal Server Error" });
+                return;
+              }
+              res.status(200).json({ message: "Question added successfully" });
+            }
+          );
         }
-        res.status(200).json({ message: "Question added successfully" });
-      });
+      );
     }
   );
 });
+
+// POST endpoint
+questionRouter.post(
+  "/addEncryptedQuestion",
+  upload.single("q_image"),
+  (req, res) => {
+    const { q_text, q_marks, q_difficulty, f_name, p_id, f_id, t_ids } =
+      req.body;
+    console.log(f_name);
+    const q_status = "pending";
+    const q_image = req.file ? req.file.path : null;
+    console.log(q_image);
+
+    // Encrypt the question text using Base64 encoding
+    const encryptedQText = encryptText(q_text);
+
+    // First, check for similar questions in the same course
+    const similarityCheckQuery = `
+        SELECT q.q_id, q.q_text
+        FROM Question q
+        JOIN Paper p ON q.p_id = p.p_id
+        WHERE q.q_text LIKE ? AND p.c_id = (SELECT c_id FROM Paper WHERE p_id = ?)
+        LIMIT 1
+      `;
+    connection.query(
+      similarityCheckQuery,
+      [`%${encryptedQText}%`, p_id],
+      (checkErr, checkResults) => {
+        if (checkErr) {
+          console.error(
+            "Error executing the similarity check query:",
+            checkErr
+          );
+          res.status(500).json({ error: "Internal Server Error" });
+          return;
+        }
+        if (checkResults.length > 0) {
+          // Similar question found, return conflict status
+          res.status(409).json({ message: "Similar question already exists" });
+          return;
+        }
+        // No similar question found, proceed with insertion
+        const insertQuery =
+          "INSERT INTO Question (q_text, q_image, q_marks, q_difficulty, q_status, f_name, p_id, f_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        connection.query(
+          insertQuery,
+          [
+            encryptedQText,
+            q_image,
+            q_marks,
+            q_difficulty,
+            q_status,
+            f_name,
+            p_id,
+            f_id
+          ],
+          (insertErr, insertResults) => {
+            if (insertErr) {
+              console.error("Error executing the insertion query:", insertErr);
+              res.status(500).json({ error: "Internal Server Error" });
+              return;
+            }
+
+            const q_id = insertResults.insertId;
+            const topicQuery =
+              "INSERT INTO question_topic (q_id, t_id) VALUES ?";
+            const topicValues = t_ids.map((t_id) => [q_id, t_id]);
+            connection.query(
+              topicQuery,
+              [topicValues],
+              (topicErr, topicResults) => {
+                if (topicErr) {
+                  console.error("Error executing the topic query:", topicErr);
+                  res.status(500).json({ error: "Internal Server Error" });
+                  return;
+                }
+                res
+                  .status(200)
+                  .json({ message: "Question added successfully" });
+              }
+            );
+          }
+        );
+      }
+    );
+  }
+);
+
+// Helper function to encrypt text using Base64 encoding
+function encryptText(text) {
+  return Buffer.from(text).toString("base64");
+}
 
 // PUT endpoint
 questionRouter.put(
@@ -264,7 +501,7 @@ questionRouter.put(
   upload.single("q_image"),
   (req, res) => {
     const q_id = req.params.q_id;
-    const { q_text, q_marks, q_difficulty } = req.body;
+    const { p_id, q_text, q_marks, q_difficulty } = req.body;
     const q_image = req.file ? req.file.path : null;
     const t_ids = req.body.t_ids || [];
 
@@ -275,70 +512,116 @@ questionRouter.put(
         res.status(500).json({ error: "Internal Server Error" });
         return;
       }
-      // Delete existing records in question_topic table
-      const deleteQuery = "DELETE FROM question_topic WHERE q_id = ?";
-      connection.query(deleteQuery, [q_id], (deleteErr, deleteResults) => {
-        if (deleteErr) {
-          console.error("Error deleting existing topics:", deleteErr);
-          connection.rollback(() => {
-            res.status(500).json({ error: "Internal Server Error" });
-          });
-          return;
-        }
-        // Insert new records in question_topic table
-        const insertQuery = "INSERT INTO question_topic (q_id, t_id) VALUES ?";
-        const topicValues = t_ids.map((t_id) => [q_id, t_id]);
-        connection.query(
-          insertQuery,
-          [topicValues],
-          (insertErr, insertResults) => {
-            if (insertErr) {
-              console.error("Error inserting new topics:", insertErr);
+
+      // Check for similar questions in the same course
+      const similarityCheckQuery = `
+          SELECT q.q_id, q.q_text
+          FROM Question q
+          JOIN Paper p ON q.p_id = p.p_id
+          WHERE q.q_text LIKE ? AND p.c_id = (SELECT c_id FROM Paper WHERE p_id = ?) AND q.q_id != ?
+          LIMIT 1
+        `;
+      connection.query(
+        similarityCheckQuery,
+        [`%${q_text}%`, p_id, q_id],
+        (checkErr, checkResults) => {
+          if (checkErr) {
+            console.error(
+              "Error executing the similarity check query:",
+              checkErr
+            );
+            connection.rollback(() => {
+              res.status(500).json({ error: "Internal Server Error" });
+            });
+            return;
+          }
+          if (checkResults.length > 0) {
+            // Similar question found, return conflict status
+            connection.rollback(() => {
+              res
+                .status(409)
+                .json({ message: "Similar question already exists" });
+            });
+            return;
+          }
+
+          // Delete existing records in question_topic table
+          const deleteQuery = "DELETE FROM question_topic WHERE q_id = ?";
+          connection.query(deleteQuery, [q_id], (deleteErr, deleteResults) => {
+            if (deleteErr) {
+              console.error("Error deleting existing topics:", deleteErr);
               connection.rollback(() => {
                 res.status(500).json({ error: "Internal Server Error" });
               });
               return;
             }
-            // Update question details
-            let updateQuery =
-              "UPDATE Question SET q_text = ?, q_marks = ?, q_difficulty = ?";
-            const updateValues = [q_text, q_marks, q_difficulty];
-            if (q_image) {
-              updateQuery += ", q_image = ?";
-              updateValues.push(q_image);
-            }
-            updateQuery += " WHERE q_id = ?";
-            updateValues.push(q_id);
+            // Insert new records in question_topic table
+            const insertQuery =
+              "INSERT INTO question_topic (q_id, t_id) VALUES ?";
+            const topicValues = t_ids.map((t_id) => [q_id, t_id]);
             connection.query(
-              updateQuery,
-              updateValues,
-              (updateErr, updateResults) => {
-                if (updateErr) {
-                  console.error("Error updating question details:", updateErr);
+              insertQuery,
+              [topicValues],
+              (insertErr, insertResults) => {
+                if (insertErr) {
+                  console.error("Error inserting new topics:", insertErr);
                   connection.rollback(() => {
                     res.status(500).json({ error: "Internal Server Error" });
                   });
                   return;
                 }
-                // Commit the transaction if all queries succeed
-                connection.commit((commitErr) => {
-                  if (commitErr) {
-                    console.error("Error committing transaction:", commitErr);
-                    connection.rollback(() => {
-                      res.status(500).json({ error: "Internal Server Error" });
+                // Update question details
+                let updateQuery =
+                  "UPDATE Question SET q_text = ?, q_marks = ?, q_difficulty = ?";
+                const updateValues = [q_text, q_marks, q_difficulty];
+                if (q_image) {
+                  updateQuery += ", q_image = ?";
+                  updateValues.push(q_image);
+                }
+                updateQuery += " WHERE q_id = ?";
+                updateValues.push(q_id);
+                connection.query(
+                  updateQuery,
+                  updateValues,
+                  (updateErr, updateResults) => {
+                    if (updateErr) {
+                      console.error(
+                        "Error updating question details:",
+                        updateErr
+                      );
+                      connection.rollback(() => {
+                        res
+                          .status(500)
+                          .json({ error: "Internal Server Error" });
+                      });
+                      return;
+                    }
+                    // Commit the transaction if all queries succeed
+                    connection.commit((commitErr) => {
+                      if (commitErr) {
+                        console.error(
+                          "Error committing transaction:",
+                          commitErr
+                        );
+                        connection.rollback(() => {
+                          res
+                            .status(500)
+                            .json({ error: "Internal Server Error" });
+                        });
+                        return;
+                      }
+                      // Send response if everything succeeds
+                      res.status(200).json({
+                        message: "Question record updated successfully"
+                      });
                     });
-                    return;
                   }
-                  // Send response if everything succeeds
-                  res
-                    .status(200)
-                    .json({ message: "Question record updated successfully" });
-                });
+                );
               }
             );
-          }
-        );
-      });
+          });
+        }
+      );
     });
   }
 );

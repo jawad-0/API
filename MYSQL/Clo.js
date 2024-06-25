@@ -17,6 +17,7 @@ cloRouter.use(bodyParser.json());
 // GET  -> getInvalidFinalCLOS/:c_id
 // GET  -> getQuestionValidMidCLOS/:q_id
 // GET  -> getQuestionValidFinalCLOS/:q_id
+// GET  -> getSelectedQuestionCLOS/:q_ids
 
 // GET endpoint
 cloRouter.get("/getCLO/:c_id", async (req, res) => {
@@ -276,6 +277,28 @@ cloRouter.get("/getQuestionValidFinalCLOS/:q_id", (req, res) => {
       return;
     }
     res.json(results);
+  });
+});
+
+// GET endpoint
+cloRouter.get("/getSelectedQuestionCLOS/:q_ids", (req, res) => {
+  const questionIds = req.params.q_ids.split(",").map((id) => parseInt(id, 10));
+  const getQuery = `
+      SELECT
+        GROUP_CONCAT(DISTINCT CLO.clo_number ORDER BY CLO.clo_number ASC) AS clo_numbers
+      FROM CLO
+      JOIN Topic_Map_CLO ON CLO.clo_id = Topic_Map_CLO.clo_id
+      JOIN Question_Topic ON Topic_Map_CLO.t_id = Question_Topic.t_id
+      WHERE Question_Topic.q_id IN (?);
+    `;
+
+  connection.query(getQuery, [questionIds], (err, results) => {
+    if (err) {
+      console.error("Error executing the query:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json(results[0]);
   });
 });
 
